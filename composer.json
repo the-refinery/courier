@@ -1,7 +1,20 @@
 {
-	"name": "therefinery/courier",
+	"name": "refinery/courier",
 	"description": "Manage the automated deliveries of custom emails, triggered by certain pre-determined events.",
 	"type": "craft-plugin",
+	"version": "1.1.0",
+	"keywords": [
+		"craft",
+		"cms",
+		"craftcms",
+		"craft-plugin",
+		"courier"
+	],
+	"support": {
+		"docs": "https://github.com/the-refinery/courier/blob/master/README.md",
+		"issues": "https://github.com/the-refinery/courier/issues"
+	},
+	"license": "MIT",
 	"authors": [
 		{
 			"name": "The Refinery",
@@ -9,6 +22,22 @@
 		}
 	],
 	"require": {
-		"composer/installers": "~1.0"
+			"craftcms/cms": "^3.0.0-RC1"
+	},
+	"autoload": {
+		"psr-4": {
+			"refinery\\courier\\": "src/"
+		}
+	},
+	"extra": {
+		"name": "Courier",
+		"handle": "courier",
+		"hasCpSettings": true,
+		"hasCpSection": true,
+		"changelogUrl": "https://github.com/the-refinery/courier/master/CHANGELOG.md",
+		"components": {
+			"courierService": "refinery\\courier\\services\\CourierService"
+		},
+		"class": "refinery\\courier\\Courier"
 	}
 }

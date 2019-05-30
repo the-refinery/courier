@@ -3,3 +3,35 @@
 *.DS_Store
 *Thumbs.db
 composer.phar
+
+# CRAFT ENVIRONMENT
+.env.php
+.env.sh
+.env
+
+# COMPOSER
+/vendor
+
+# BUILD FILES
+/bower_components/*
+/node_modules/*
+/build/*
+/yarn-error.log
+
+# MISC FILES
+.cache
+.idea
+.project
+.settings
+*.esproj
+*.sublime-workspace
+*.sublime-project
+*.tmproj
+*.tmproject
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+config.codekit3
+prepros-6.config
