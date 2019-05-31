@@ -10,7 +10,8 @@
 
 namespace refinery\courier;
 
-use refinery\courier\services\CourierService as CourierServiceService;
+// use refinery\courier\services\CourierService as CourierServiceService;
+use refinery\courier\services\EventsService as EventsService;
 use refinery\courier\variables\CourierVariable;
 use refinery\courier\twigextensions\CourierTwigExtension;
 use refinery\courier\models\Settings;
@@ -63,51 +64,62 @@ class Courier extends Plugin
         parent::init();
         self::$plugin = $this;
 
-        Craft::$app->view->registerTwigExtension(new CourierTwigExtension());
-
-        Event::on(
-            UrlManager::class,
-            UrlManager::EVENT_REGISTER_SITE_URL_RULES,
-            function (RegisterUrlRulesEvent $event) {
-                $event->rules['siteActionTrigger1'] = 'courier/default';
-            }
+        $this->setComponents(
+            [
+                'events' => services\Events::class,
+                'blueprints' => services\Blueprints::class,
+                'deliveries' => services\Deliveries::class,
+                'emails' => services\Emails::class,
+            ]
         );
 
-        Event::on(
-            UrlManager::class,
-            UrlManager::EVENT_REGISTER_CP_URL_RULES,
-            function (RegisterUrlRulesEvent $event) {
-                $event->rules['cpActionTrigger1'] = 'courier/default/do-something';
-            }
-        );
+        $this->events->setupEventListeners();
 
-        Event::on(
-            CraftVariable::class,
-            CraftVariable::EVENT_INIT,
-            function (Event $event) {
-                /** @var CraftVariable $variable */
-                $variable = $event->sender;
-                $variable->set('courier', CourierVariable::class);
-            }
-        );
 
-        Event::on(
-            Plugins::class,
-            Plugins::EVENT_AFTER_INSTALL_PLUGIN,
-            function (PluginEvent $event) {
-                if ($event->plugin === $this) {
-                }
-            }
-        );
+        // $this->events->setupEventListeners();
 
-        Craft::info(
-            Craft::t(
-                'courier',
-                '{name} plugin loaded',
-                ['name' => $this->name]
-            ),
-            __METHOD__
-        );
+        // craft()->courier_events->setupEventListeners();
+        // Courier::getInstance()->Eventsaaaa->myMethod();
+        // $this->EventsService->setupEventListeners();
+
+        // Craft::$app->view->registerTwigExtension(new CourierTwigExtension());
+
+        // Event::on(
+        //     UrlManager::class,
+        //     UrlManager::EVENT_REGISTER_SITE_URL_RULES,
+        //     function (RegisterUrlRulesEvent $event) {
+        //         $event->rules['siteActionTrigger1'] = 'courier/default';
+        //     }
+        // );
+
+        // Event::on(
+        //     UrlManager::class,
+        //     UrlManager::EVENT_REGISTER_CP_URL_RULES,
+        //     function (RegisterUrlRulesEvent $event) {
+        //         $event->rules['cpActionTrigger1'] = 'courier/default/do-something';
+        //     }
+        // );
+
+        // Event::on(
+        //     CraftVariable::class,
+        //     CraftVariable::EVENT_INIT,
+        //     function (Event $event) {
+        //         /** @var CraftVariable $variable */
+        //         $variable = $event->sender;
+        //         $variable->set('courier', CourierVariable::class);
+        //     }
+        // );
+
+        // Event::on(
+        //     Plugins::class,
+        //     Plugins::EVENT_AFTER_INSTALL_PLUGIN,
+        //     function (PluginEvent $event) {
+        //         if ($event->plugin === $this) {
+        //         }
+        //     }
+        // );
+
+        // Courier::error("HELLO", true);
     }
 
     // Protected Methods
