@@ -27,6 +27,8 @@ use craft\web\Controller;
 use Craft;
 use yii\base\Exception;
 use yii\web\Response;
+use refinery\courier\records\Blueprint;
+
 // use barrelstrength\sproutbaseemail\models\ModalResponse;
 // use barrelstrength\sproutemail\elements\SentEmail;
 // use barrelstrength\sproutemail\SproutEmail;
@@ -58,6 +60,46 @@ class BlueprintsController extends Controller
         return $this->renderTemplate('courier/blueprints', $variables);
     }
 
+    public function actionCreate(): Response
+    {
+      /*
+      $variables = craft()->urlManager->getRouteParams()['variables'];
+      // Create a fresh Blueprint, or get the invalid one that was not saved yet
+      if (empty($variables['blueprint'])) {
+        $variables['blueprint'] = new Courier_BlueprintModel();
+      }
+
+      $variables['title'] = Craft::t('Create new blueprint');
+
+      return $this->renderTemplate('courier/_blueprint', $variables);
+      */
+
+      // $variables['title'] = Craft::t('Create new blueprint');
+      $variables['title'] = 'Create new blueprint';
+      $variables['blueprint'] = new Blueprint();
+      $variables['availableEvents'] = $this->buildAvailableEventsCheckboxOptions(
+        Courier::getInstance()->settings->availableEvents
+      );
+      return $this->renderTemplate('courier/_blueprint', $variables);
+    }
+
+    private function buildAvailableEventsCheckboxOptions($availableEvents)
+    {
+      $options = [];
+      foreach($availableEvents as $availableEvent)
+      {
+        if($availableEvent['enabled'])
+        {
+          $option = array(
+            "label" => $availableEvent["event"],
+            "value" => $availableEvent["event"],
+          );
+          array_push($options, $option);
+        }
+      }
+
+      return $options;
+    }
     /**
      * Shows the asset volume list.
      *
