@@ -35,7 +35,6 @@ class Blueprints extends Component
 	 */
 	public function getAllBlueprints($criteria = [])
 	{
-        /*
         // CONVERSION: $records = Courier_BlueprintRecord::model()->findAll($criteria);
         $records = Blueprint::findAll($criteria);
 
@@ -44,8 +43,7 @@ class Blueprints extends Component
 
         return $models;
 
-        */
-        return []; // TEMPORARY REMOVE ME
+        // return []; // TEMPORARY REMOVE ME
     }
 
     private function populateModels(array $records): array

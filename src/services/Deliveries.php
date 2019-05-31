@@ -15,6 +15,8 @@ use refinery\courier\Courier;
 use Craft;
 use craft\base\Component;
 use yii\base\Event;
+use refinery\courier\records\Delivery as Delivery;
+use refinery\courier\models\Delivery as DeliveryModel;
 
 /**
  * @author    The Refinery
@@ -32,17 +34,43 @@ class Deliveries extends Component
 	 *
 	 * @return Delivery[]
 	 */
-	public function getAllDeliveries($criteria = [])
+	public function getAllDeliveries($criteria = null)
 	{
-        $records = Courier_DeliveryRecord::model()
-			->with('blueprint')
-			->findAll($criteria);
+    // CONVERSION: $records = Courier_DeliveryRecord::model()
+		// 	->with('blueprint')
+		// 	->findAll($criteria);
+		if(is_null($criteria))
+		{
+			$criteria = Delivery::find();
+		}
 
-        $models = Courier_DeliveryModel::populateModels($records);
+		// $records = Delivery::findAll($criteria)
+		$records = $criteria
+			->with(['blueprint'])
+			->all();
+
+		// CONVERSION: $models = Courier_DeliveryModel::populateModels($records);
+    $models = $this->populateModels($records);
 
 		return $models;
 	}
 
+    private function populateModels(array $records): array
+    {
+        $models = [];
+
+        if (!empty($records)) {
+            foreach ($records as $record) {
+                $recordAttributes = $record->getAttributes();
+                $model = new DeliveryModel();
+                $model->setAttributes($recordAttributes);
+
+                $models[] = $model;
+            }
+        }
+
+        return $models;
+    }
 	/**
 	 * Create and save a delivery to record and keep track of a blueprint email that was sent
 	 *

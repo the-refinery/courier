@@ -85,6 +85,11 @@ class Courier extends Plugin
 
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
             $event->rules['courier'] = 'courier/blueprints/index';
+            $event->rules['courier/blueprints'] = 'courier/blueprints/index';
+            $event->rules['courier/blueprints/new'] = 'courier/blueprints/create';
+            $event->rules['courier/blueprints/<id:\d+>'] = 'courrier/blueprints/edit';
+            $event->rules['courier/deliveries'] = 'courier/deliveries/index';
+            // $event->rules['courier'] = 'courier/blueprints/index';
             // $event->rules['cocktails/<widgetId:\d+>'] = 'cocktails/edit-cocktail';
         });
 
