@@ -40,8 +40,13 @@ class Events extends Component
 		$availableEvents = [];
 		foreach ($courierSettings->availableEvents as $eventOption) {
 			if ($eventOption['enabled']) {
-				$availableEvents[$eventOption['eventClass']] = $eventOption['eventClass'];
-				$availableEvents[$eventOption['eventHandle']] = $eventOption['eventHandle'];
+				$event = array();
+				$sum = md5($eventOption['eventClass'].$eventOption['eventHandle']);
+				$event[$sum] = array();
+				$event[$sum]['eventClass'] = $eventOption['eventClass'];
+				$event[$sum]['eventHandle'] = $eventOption['eventHandle'];
+				array_push($availableEvents, $event);
+				// $availableEvents[$eventOption['eventHandle']] = $eventOption['eventHandle'];
 			}
 		}
 
@@ -79,14 +84,26 @@ class Events extends Component
 			if (!$blueprint->eventTriggers) {
 				continue;
 			}
-			foreach ($blueprint->eventTriggers as $event) {
-				// Is event currently enabled?
-				if (!isset($availableEvents[$event])) {
-					continue;
+
+
+			$eventTriggers = json_decode($blueprint->eventTriggers, true);
+			// var_dump($availableEvents);
+			// die();
+
+			if(!is_null($eventTriggers)) {
+				// foreach ($blueprint->eventTriggers as $event) {
+				foreach ($eventTriggers as $eventTrigger) {
+					// TODO: Figure how how to not use this here.
+					$eventTrigger = json_decode($eventTrigger, true);
+					// Is event currently enabled?
+					// if (!isset($availableEvents[$event])) {
+					if(!array_key_exists(md5($eventTrigger['eventClass'].$eventTrigger['eventHandle']), $availableEvents)){
+						continue;
+					}
+					craft()->on($event, function(Event $event) use ($blueprint) {
+						craft()->courier_blueprints->checkEventConditions($event, $blueprint);
+					});
 				}
-				craft()->on($event, function(Event $event) use ($blueprint) {
-					craft()->courier_blueprints->checkEventConditions($event, $blueprint);
-				});
 			}
 		}
 

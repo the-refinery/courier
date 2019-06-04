@@ -53,7 +53,11 @@
 							</th>
 							<td data-title="Email Recipient">{{ blueprint.toEmail }}</td>
 							<td data-title="Email Subject">{{ blueprint.emailSubject }}</td>
-							<td data-title="Event Triggers">{{ blueprint.eventTriggers|join(', ') }}</td>
+							<td data-title="Event Triggers">
+								{% for trigger in blueprint.eventTriggersJsonArray %}
+									{{ trigger['eventClass'] }}->{{ trigger['eventHandle'] }}
+								{% endfor %}
+							</td>
 							<td data-title="HTML Email Template Path">{{ blueprint.htmlEmailTemplatePath }}</td>
 							<td class="thin"><a class="delete icon" title="Delete" role="button"></a></td>
 						</tr>

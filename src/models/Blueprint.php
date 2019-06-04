@@ -29,9 +29,41 @@ class Blueprint extends Model
      * @var string
      */
     // public $someAttribute = 'Some Default';
+    // public $fullName;
+
+    public $id;
+    public $name;
+    public $fromName = "";
+    public $htmlEmailTemplatePath;
+    public $toEmail;
+    public $fromEmail;
+    public $emailSubject;
+    public $toName;
+    public $replyToEmail = "";
+    public $ccEmail = "";
+    public $bccEmail = "";
+    public $textEmailTemplatePath = "";
+    public $description = "";
+    public $eventTriggerConditions = "";
+    public $eventTriggers = "";
+    public $enabled = true;
 
     // Public Methods
     // =========================================================================
+
+    public function eventTriggersJsonArray() {
+        if(is_null($this->eventTriggers)) {
+            return null;
+        }
+
+        $triggers = [];
+
+        foreach(json_decode($this->eventTriggers, true) as $eventTrigger) {
+            array_push($triggers, json_decode($eventTrigger, true));
+        }
+
+        return $triggers;
+    }
 
     /**
      * @inheritdoc

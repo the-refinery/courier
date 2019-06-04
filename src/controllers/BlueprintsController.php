@@ -28,6 +28,7 @@ use Craft;
 use yii\base\Exception;
 use yii\web\Response;
 use refinery\courier\records\Blueprint;
+use refinery\courier\models\Blueprint as BlueprintModel;
 
 // use barrelstrength\sproutbaseemail\models\ModalResponse;
 // use barrelstrength\sproutemail\elements\SentEmail;
@@ -105,6 +106,68 @@ class BlueprintsController extends Controller
 
       return $options;
     }
+
+    public function actionSave(): Response
+    {
+      $this->requirePostRequest();
+
+      // $blueprint = new Courier_BlueprintModel();
+      $blueprint = new BlueprintModel();
+        // var_dump($blueprint);
+        // die();
+
+      // $request = craft()->getRequest();
+      $request = Craft::$app->getRequest();
+
+      $blueprint->id 						= $request->getParam('blueprintId', $blueprint->id);
+      $blueprint->name 					= $request->getParam('name', $blueprint->name);
+      $blueprint->description 			= $request->getParam('description', $blueprint->description);
+      $blueprint->htmlEmailTemplatePath 	= $request->getParam('htmlEmailTemplatePath', $blueprint->htmlEmailTemplatePath);
+      $blueprint->textEmailTemplatePath 	= $request->getParam('textEmailTemplatePath', $blueprint->textEmailTemplatePath);
+      $blueprint->enabled 				= $request->getParam('enabled', $blueprint->enabled);
+      $blueprint->emailSubject 			= $request->getParam('emailSubject', $blueprint->emailSubject);
+      $blueprint->toEmail 				= $request->getParam('toEmail', $blueprint->toEmail);
+      $blueprint->toName 					= $request->getParam('toName', $blueprint->toName);
+      $blueprint->fromEmail 				= $request->getParam('fromEmail', $blueprint->fromEmail);
+      $blueprint->fromName 				= $request->getParam('fromName', $blueprint->fromName);
+      $blueprint->replyToEmail			= $request->getParam('replyToEmail', $blueprint->replyToEmail);
+      $blueprint->ccEmail 				= $request->getParam('ccEmail', $blueprint->ccEmail);
+      $blueprint->bccEmail 				= $request->getParam('bccEmail', $blueprint->bccEmail);
+      $blueprint->eventTriggers 			= $request->getParam('eventTriggers', $blueprint->eventTriggers);
+      $blueprint->eventTriggerConditions 	= $request->getParam('eventTriggerConditions', $blueprint->eventTriggerConditions);
+
+      // Validate and save the blueprint
+      /* CONVERSION
+      if (!craft()->courier_blueprints->saveBlueprint($blueprint)) {
+        craft()->userSession->setError(Craft::t('Couldn’t save blueprint.'));
+
+        // Send the invalid blueprint back to the template
+        return craft()->urlManager->setRouteVariables(['blueprint' => $blueprint]);
+      }
+      */
+
+      if (!Courier::getInstance()->blueprints->saveBlueprint($blueprint)) {
+        // craft()->userSession->setError(Craft::t('Couldn’t save blueprint.'));
+        Craft::$app->getSession()->setError(Craft::t('courier', 'Couldn’t save blueprint.'));
+
+        // Send the invalid blueprint back to the template
+        // Send the settings back to the template
+        Craft::$app->getUrlManager()->setRouteParams([
+            'blueprint' => $blueprint,
+        ]);
+
+        return null;
+
+        // return craft()->urlManager->setRouteVariables(['blueprint' => $blueprint]);
+      }
+
+      // craft()->userSession->setNotice(Craft::t('Blueprint saved.'));
+      Craft::$app->getSession()->setNotice(Craft::t('courier', 'Blueprint saved.'));
+
+      // Saved, success!
+      return $this->redirectToPostedUrl($blueprint);
+    }
+
     /**
      * Shows the asset volume list.
      *
