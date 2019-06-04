@@ -40,7 +40,8 @@ class Events extends Component
 		$availableEvents = [];
 		foreach ($courierSettings->availableEvents as $eventOption) {
 			if ($eventOption['enabled']) {
-				$availableEvents[$eventOption['event']] = $eventOption['event'];
+				$availableEvents[$eventOption['eventClass']] = $eventOption['eventClass'];
+				$availableEvents[$eventOption['eventHandle']] = $eventOption['eventHandle'];
 			}
 		}
 

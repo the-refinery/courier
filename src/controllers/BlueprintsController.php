@@ -91,8 +91,13 @@ class BlueprintsController extends Controller
         if($availableEvent['enabled'])
         {
           $option = array(
-            "label" => $availableEvent["event"],
-            "value" => $availableEvent["event"],
+            "label" => "Class: <b>{$availableEvent["eventClass"]}</b>, Handle: <b>{$availableEvent["eventHandle"]}</b>",
+            "value" => json_encode(
+              array(
+                "eventClass" => $availableEvent["eventClass"],
+                "eventHandle" => $availableEvent["eventHandle"],
+              )
+            ),
           );
           array_push($options, $option);
         }

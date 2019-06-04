@@ -26,7 +26,13 @@ class Settings extends Model
     public $deliveriesRecordLimit = 50;
     public $availableEvents = [
         [
-            'event' => 'entries.onSaveEntry',
+            'eventClass' => 'Entry',
+            'eventHandle' => 'Entry::EVENT_BEFORE_SAVE',
+            'enabled' => true
+        ],
+        [
+            'eventClass' => 'Entry',
+            'eventHandle' => 'Entry::EVENT_AFTER_SAVE',
             'enabled' => true
         ]
     ];

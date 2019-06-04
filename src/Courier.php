@@ -73,15 +73,15 @@ class Courier extends Plugin
             ]
         );
 
-        $this->events->setupEventListeners();
+        if($this->isInstalled){
+            $this->events->setupEventListeners();
+        }
 
-	// 'courier' => [ 'action' => 'courier/blueprints/index' ],
-	// 'courier/blueprints' => [ 'action' => 'courier/blueprints/index' ],
-	// 'courier/blueprints/new' => [ 'action' => 'courier/blueprints/create' ],
-	// 'courier/blueprints/(?P<id>\d+)' => [ 'action' => 'courier/blueprints/edit' ],
-    // 'courier/deliveries' => [ 'action' => 'courier/deliveries/index' ],
-
-
+        // 'courier' => [ 'action' => 'courier/blueprints/index' ],
+        // 'courier/blueprints' => [ 'action' => 'courier/blueprints/index' ],
+        // 'courier/blueprints/new' => [ 'action' => 'courier/blueprints/create' ],
+        // 'courier/blueprints/(?P<id>\d+)' => [ 'action' => 'courier/blueprints/edit' ],
+        // 'courier/deliveries' => [ 'action' => 'courier/deliveries/index' ],
 
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
             $event->rules['courier'] = 'courier/blueprints/index';
@@ -89,56 +89,7 @@ class Courier extends Plugin
             $event->rules['courier/blueprints/new'] = 'courier/blueprints/create';
             $event->rules['courier/blueprints/<id:\d+>'] = 'courrier/blueprints/edit';
             $event->rules['courier/deliveries'] = 'courier/deliveries/index';
-            // $event->rules['courier'] = 'courier/blueprints/index';
-            // $event->rules['cocktails/<widgetId:\d+>'] = 'cocktails/edit-cocktail';
         });
-
-
-
-        // $this->events->setupEventListeners();
-
-        // craft()->courier_events->setupEventListeners();
-        // Courier::getInstance()->Eventsaaaa->myMethod();
-        // $this->EventsService->setupEventListeners();
-
-        // Craft::$app->view->registerTwigExtension(new CourierTwigExtension());
-
-        // Event::on(
-        //     UrlManager::class,
-        //     UrlManager::EVENT_REGISTER_SITE_URL_RULES,
-        //     function (RegisterUrlRulesEvent $event) {
-        //         $event->rules['siteActionTrigger1'] = 'courier/default';
-        //     }
-        // );
-
-        // Event::on(
-        //     UrlManager::class,
-        //     UrlManager::EVENT_REGISTER_CP_URL_RULES,
-        //     function (RegisterUrlRulesEvent $event) {
-        //         $event->rules['cpActionTrigger1'] = 'courier/default/do-something';
-        //     }
-        // );
-
-        // Event::on(
-        //     CraftVariable::class,
-        //     CraftVariable::EVENT_INIT,
-        //     function (Event $event) {
-        //         /** @var CraftVariable $variable */
-        //         $variable = $event->sender;
-        //         $variable->set('courier', CourierVariable::class);
-        //     }
-        // );
-
-        // Event::on(
-        //     Plugins::class,
-        //     Plugins::EVENT_AFTER_INSTALL_PLUGIN,
-        //     function (PluginEvent $event) {
-        //         if ($event->plugin === $this) {
-        //         }
-        //     }
-        // );
-
-        // Courier::error("HELLO", true);
     }
 
     // Protected Methods
