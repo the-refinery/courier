@@ -56,6 +56,10 @@ class Blueprint extends Model
             return null;
         }
 
+        if(empty($this->eventTriggers)){
+            return null;
+        }
+
         $triggers = [];
 
         foreach(json_decode($this->eventTriggers, true) as $eventTrigger) {

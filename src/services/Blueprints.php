@@ -16,7 +16,7 @@ use Craft;
 use craft\base\Component;
 use refinery\courier\records\Blueprint as Blueprint;
 use refinery\courier\models\Blueprint as BlueprintModel;
-
+use refinery\courier\services\ModelPopulator;
 
 /**
  * @author    The Refinery
@@ -78,7 +78,8 @@ class Blueprints extends Component
         */
 
 		if ($model->id)
-			$record = BlueprintModel::findById($model->id);
+			// $record = BlueprintModel::findById($model->id);
+			$record = Blueprint::findOne($model->id);
 		else {
 			$record = new Blueprint();
         }
@@ -113,5 +114,38 @@ class Blueprints extends Component
 		$model->id = $record->id;
 
 		return true;
+	}
+
+	/**
+	 * @param int $id
+	 *
+	 * @return BlueprintModel|null
+	 */
+	public function getBlueprintById($id)
+	{
+		// $record = Courier_BlueprintRecord::model()->findById($id);
+
+		// if (!$record) {
+		// 	return null;
+		// }
+
+		// $model = Courier_BlueprintModel::populateModel($record);
+
+		// return $model;
+
+		$record = Blueprint::findOne($id);
+
+		if (!$record) {
+			return null;
+		}
+
+		$models = Courier::getInstance()
+			->modelPopulator
+			->populateModels(
+				[$record],
+				\refinery\courier\models\Blueprint::class
+			);
+
+		return $models[0];
 	}
 }

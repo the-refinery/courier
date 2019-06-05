@@ -169,6 +169,67 @@ class BlueprintsController extends Controller
     }
 
     /**
+     * Edit a blueprint
+     *
+       * @return Response
+     * @throws HttpException
+     */
+    public function actionEdit() : Response
+    {
+      // $variables = craft()->urlManager->getRouteParams()['variables'];
+      $variables = Craft::$app->getUrlManager()->getRouteParams([
+        'variables'
+      ]);
+
+      $variables['availableEvents'] = $this->buildAvailableEventsCheckboxOptions(
+        Courier::getInstance()->settings->availableEvents
+      );
+
+      // Get blueprint by id if it is not loaded already
+      if (empty($variables['blueprint'])) {
+        // $variables['blueprint'] = craft()->courier_blueprints->getBlueprintById($variables['id']);
+
+
+        // TRY TO EDIT AND GET MODELS TO WORK HERE
+        // also figure out how to get the checkboxes to popoulate correctly for events on edit/new page
+        // TRY TO EDIT AND GET MODELS TO WORK HERE
+        // TRY TO EDIT AND GET MODELS TO WORK HERE
+        // TRY TO EDIT AND GET MODELS TO WORK HERE
+        // TRY TO EDIT AND GET MODELS TO WORK HERE
+        // TRY TO EDIT AND GET MODELS TO WORK HERE
+        // TRY TO EDIT AND GET MODELS TO WORK HERE
+        // TRY TO EDIT AND GET MODELS TO WORK HERE
+        // TRY TO EDIT AND GET MODELS TO WORK HERE
+        // TRY TO EDIT AND GET MODELS TO WORK HERE
+        // TRY TO EDIT AND GET MODELS TO WORK HERE
+        $variables['blueprint'] = Courier::getInstance()
+          ->blueprints
+          ->getBlueprintById($variables['id']);
+      }
+
+      // var_dump($variables['availableEvents']);
+      // var_dump("<br />");
+      // var_dump("<br />");
+      // var_dump("<br />");
+      // var_dump("<br />");
+      // var_dump("<br />");
+      // var_dump("<br />");
+      // var_dump($variables['blueprint']->eventTriggers);
+      // die();
+
+      // Could not find requested Blueprint
+      if ($variables['blueprint'] === null) {
+        throw new HttpException(404);
+      }
+
+      // var_dump($variables['blueprint']);
+      // die();
+      $variables['title'] = $variables['blueprint']->name;
+
+      return $this->renderTemplate('courier/_blueprint', $variables);
+    }
+
+    /**
      * Shows the asset volume list.
      *
      * @return Response

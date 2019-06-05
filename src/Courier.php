@@ -70,6 +70,7 @@ class Courier extends Plugin
                 'blueprints' => services\Blueprints::class,
                 'deliveries' => services\Deliveries::class,
                 'emails' => services\Emails::class,
+                'modelPopulator' => services\ModelPopulator::class,
             ]
         );
 
@@ -87,7 +88,7 @@ class Courier extends Plugin
             $event->rules['courier'] = 'courier/blueprints/index';
             $event->rules['courier/blueprints'] = 'courier/blueprints/index';
             $event->rules['courier/blueprints/new'] = 'courier/blueprints/create';
-            $event->rules['courier/blueprints/<id:\d+>'] = 'courrier/blueprints/edit';
+            $event->rules['courier/blueprints/<id:\d+>'] = 'courier/blueprints/edit';
             $event->rules['courier/deliveries'] = 'courier/deliveries/index';
         });
     }
