@@ -47,7 +47,7 @@ class Blueprints extends Component
         $models = $this->populateModels($records);
 
 		return $models;
-    }
+	}
 
     private function populateModels(array $records): array
     {

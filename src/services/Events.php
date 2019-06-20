@@ -15,6 +15,9 @@ use refinery\courier\Courier;
 use Craft;
 use craft\base\Component;
 use yii\base\Event;
+use refinery\courier\records\Event as CourierEventRecord;
+use refinery\courier\models\Event as CourierEventModel;
+use refinery\courier\services\ModelPopulator;
 
 /**
  * @author    The Refinery
@@ -32,8 +35,31 @@ class Events extends Component
 	 *
 	 * @return array
 	 */
+
+
+	public function getAllEvents($criteria = null)
+	{
+		if(is_null($criteria))
+		{
+			$criteria = CourierEventRecord::find();
+		}
+
+		$records = $criteria
+			->all();
+
+		$models = Courier::getInstance()
+			->modelPopulator
+			->populateModels(
+				$records,
+				\refinery\courier\models\Event::class
+			);
+
+		return $models;
+	}
+
 	public function getAvailableEvents()
 	{
+		/*
 		// CONVERSION: $courierSettings = craft()->plugins->getPlugin('courier')->getSettings();
 		$courierSettings = Courier::$plugin->getSettings();
 
@@ -51,6 +77,7 @@ class Events extends Component
 		}
 
 		return $availableEvents;
+		*/
 	}
 
 	/**
@@ -60,6 +87,9 @@ class Events extends Component
 	 */
 	public function setupEventListeners()
 	{
+		/*
+
+
 		// CONVERSION: $blueprints = craft()->courier_blueprints->getAllBlueprints();
 		// $blueprints = craft()->courier_blueprints->getAllBlueprints();
 		$blueprints = Courier::getInstance()->blueprints->getAllBlueprints();
@@ -85,7 +115,6 @@ class Events extends Component
 				continue;
 			}
 
-
 			$eventTriggers = json_decode($blueprint->eventTriggers, true);
 			// var_dump($availableEvents);
 			// die();
@@ -106,6 +135,10 @@ class Events extends Component
 				}
 			}
 		}
+		*/
+
+
+
 
 		// On the event that an email is sent, create a successful delivery record
 		// CONVERSION: craft()->on('courier_emails.onAfterBlueprintEmailSent', [

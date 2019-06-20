@@ -24,6 +24,7 @@ class Settings extends Model
 {
 
     public $deliveriesRecordLimit = 50;
+    /*
     public $availableEvents = [
         [
             'eventClass' => 'Entry',
@@ -36,6 +37,7 @@ class Settings extends Model
             'enabled' => true
         ]
     ];
+    */
 
     public function rules()
     {

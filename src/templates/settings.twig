@@ -15,7 +15,7 @@
 {# I don't believe the styles are needed here #}
 {# {% includeCssResource "courier/css/Courier_Style.css" %} #}
 
-{{ forms.editableTableField({
+{# {{ forms.editableTableField({
 	label: 'Available Events'|t,
 	instructions: 'The events that all blueprints will have the option of listening for. See Craft\'s <a href="https://craftcms.com/docs/plugins/events-reference">events reference</a> as a starting point.',
 	id: 'availableEvents',
@@ -35,7 +35,7 @@
 		}
 	},
 	rows: settings.availableEvents
-}) }}
+}) }} #}
 
 {{ forms.textField({
 	label: 'Deliveries Record Limit'|t,

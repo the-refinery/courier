@@ -8,6 +8,7 @@ class Install extends Migration
 {
     private $blueprintsTable = '{{%courier_blueprints}}';
     private $deliveriesTable = '{{%courier_deliveries}}';
+    private $eventsTable = '{{%courier_events}}';
 
     public function safeUp()
     {
@@ -116,6 +117,25 @@ class Install extends Migration
             $this->addForeignKey(null, $this->deliveriesTable, ['blueprintId'], $this->blueprintsTable, ['id'], 'CASCADE');
         }
 
+        $eventsTableCheck = $this->getDb()->tableExists($this->eventsTable);
+        if ($eventsTableCheck == false) {
+            $this->createTable($this->eventsTable,
+                [
+                    'id' => $this->primaryKey(),
+                    'eventClass' => $this->text()->notNull(),
+                    'eventHandle' => $this->text()->notNull(),
+                    'enabled' => $this->boolean()->defaultValue(true)->notNull(),
+                    'dateCreated' => $this->dateTime()->notNull(),
+                    'dateUpdated' => $this->dateTime()->notNull(),
+                    'uid' => $this->uid(),
+                ]
+            );
+            // public function addForeignKey($name, $table, $columns, $refTable, $refColumns, $delete = null, $update = null)
+
+            // Add the foreign key from deliveries -> blueprints
+            // $this->addForeignKey(null, $this->deliveriesTable, ['blueprintId'], $this->blueprintsTable, ['id'], 'CASCADE');
+        }
+
 
 
 
@@ -195,6 +215,12 @@ class Install extends Migration
 
         if ($blueprintsTableCheck) {
             $this->dropTable($this->blueprintsTable);
+        }
+
+        $eventsTableCheck = $this->getDb()->tableExists($this->eventsTable);
+
+        if ($eventsTableCheck) {
+            $this->dropTable($this->eventsTable);
         }
 
         // $reportGroupTable = $this->getDb()->tableExists($this->reportGroupTable);
