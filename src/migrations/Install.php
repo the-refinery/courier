@@ -124,6 +124,7 @@ class Install extends Migration
                     'id' => $this->primaryKey(),
                     'eventClass' => $this->text()->notNull(),
                     'eventHandle' => $this->text()->notNull(),
+                    'description' => $this->text()->null(),
                     'enabled' => $this->boolean()->defaultValue(true)->notNull(),
                     'dateCreated' => $this->dateTime()->notNull(),
                     'dateUpdated' => $this->dateTime()->notNull(),
