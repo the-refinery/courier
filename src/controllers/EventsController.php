@@ -87,4 +87,20 @@ class EventsController extends Controller
 
     return $this->renderTemplate('courier/_event', $variables);
   }
+
+  public function actionDelete() : Response
+	{
+    $this->requirePostRequest();
+    $this->requireAcceptsJson();
+
+    $id = Craft::$app->getRequest()->getRequiredBodyParam('id');
+
+    $result = Courier::getInstance()
+      ->events
+      ->deleteEventById($id);
+
+    return $this->asJson([
+      'success' => $result
+    ]);
+  }
 }

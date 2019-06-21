@@ -49,7 +49,7 @@
 				</thead>
 				<tbody>
 					{% for event in events %}
-						<tr data-id="{{ event.id }}" data-event-class="{{ event.eventClass }}" data-event-handle="{{ event.eventHandle }}">
+						<tr data-id="{{ event.id }}" data-uid="{{ event.uid }}" data-name="{{ event.eventClass }}" data-event-class="{{ event.eventClass }}" data-event-handle="{{ event.eventHandle }}">
 							<td data-title="Event Class">
 								<a href="{{ url('courier/events/' ~ event.id) }}">{{ event.eventClass }}</a>
 							</td>

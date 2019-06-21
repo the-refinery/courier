@@ -92,6 +92,18 @@ class Events extends Component
 		return $models[0];
 	}
 
+	public function deleteEventById($id)
+	{
+    $record = CourierEventRecord::findOne($id);
+    $result = false;
+
+    if ($record) {
+      $result = $record->delete();
+    }
+
+    return $result;
+	}
+
 	public function getAvailableEvents()
 	{
 		/*

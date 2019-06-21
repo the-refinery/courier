@@ -32,6 +32,7 @@ class Event extends Model
     // public $fullName;
 
     public $id;
+    public $uid;
     public $eventClass;
     public $eventHandle;
     public $description;
