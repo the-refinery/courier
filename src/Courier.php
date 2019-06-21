@@ -92,6 +92,7 @@ class Courier extends Plugin
             $event->rules['courier/deliveries'] = 'courier/deliveries/index';
             $event->rules['courier/events'] = 'courier/events/index';
             $event->rules['courier/events/new'] = 'courier/events/create';
+            $event->rules['courier/events/<id:\d+>'] = 'courier/events/edit';
         });
     }
 

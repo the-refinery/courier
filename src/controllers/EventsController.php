@@ -65,4 +65,26 @@ class EventsController extends Controller
 
     return $this->redirect("courier/events");
   }
+
+  public function actionEdit() : Response
+  {
+    $variables = Craft::$app->getUrlManager()->getRouteParams([
+      'variables'
+    ]);
+
+    // Get blueprint by id if it is not loaded already
+    if (empty($variables['event'])) {
+      $variables['event'] = Courier::getInstance()
+        ->events
+        ->getEventById($variables['id']);
+    }
+
+    if ($variables['event'] === null) {
+      throw new HttpException(404);
+    }
+
+    $variables['title'] = "Edit Courier Event";
+
+    return $this->renderTemplate('courier/_event', $variables);
+  }
 }

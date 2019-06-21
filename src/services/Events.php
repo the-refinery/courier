@@ -24,7 +24,7 @@ class Events extends Component
 	public function saveEvent(CourierEventModel $eventModel)
 	{
 		if ($eventModel->id){
-			$record = CourierEventModel::findOne($eventModel->id);
+			$record = CourierEventRecord::findOne($eventModel->id);
 		}
 		else {
 			$record = new CourierEventRecord();
@@ -72,6 +72,24 @@ class Events extends Component
 			);
 
 		return $models;
+	}
+
+	public function getEventById($id)
+	{
+		$record = CourierEventRecord::findOne($id);
+
+		if (!$record) {
+			return null;
+		}
+
+		$models = Courier::getInstance()
+			->modelPopulator
+			->populateModels(
+				[$record],
+				\refinery\courier\models\Event::class
+			);
+
+		return $models[0];
 	}
 
 	public function getAvailableEvents()
