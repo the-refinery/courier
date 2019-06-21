@@ -34,6 +34,7 @@ class Event extends Model
     public $id;
     public $eventClass;
     public $eventHandle;
+    public $description;
     public $enabled;
     // public $name;
     // public $fromName = "";

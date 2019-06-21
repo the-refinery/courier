@@ -91,6 +91,7 @@ class Courier extends Plugin
             $event->rules['courier/blueprints/<id:\d+>'] = 'courier/blueprints/edit';
             $event->rules['courier/deliveries'] = 'courier/deliveries/index';
             $event->rules['courier/events'] = 'courier/events/index';
+            $event->rules['courier/events/new'] = 'courier/events/create';
         });
     }
 
