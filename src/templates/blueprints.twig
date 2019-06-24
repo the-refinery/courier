@@ -56,7 +56,7 @@
 							<td data-title="Email Subject">{{ blueprint.emailSubject }}</td>
 							<td data-title="Event Triggers">
 								{% for eventTriggerId in blueprint.eventTriggersJsonArray %}
-									{% set event = eventLookup[eventTriggerId] %}
+									{% set event = eventLookup[eventTriggerId] ?? null %}
 									{% if event %}
 										{{ event.eventClass }} => {{ event.eventHandle }}<br />
 									{% endif %}
