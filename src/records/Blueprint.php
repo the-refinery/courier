@@ -32,4 +32,20 @@ class Blueprint extends ActiveRecord
     {
         return '{{%courier_blueprints}}';
     }
+
+    // public function beforeSave(bool $isNew): bool
+    public function beforeSave($isNew): bool
+    {
+        if (!parent::beforeSave($isNew)) {
+            return false;
+        }
+
+        // Enforce false before going to the database
+        if(is_null($this->enabled) || $this->enabled === '') {
+            $this->enabled = false;
+        }
+
+        return true;
+    }
+
 }
