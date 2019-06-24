@@ -57,8 +57,20 @@ class BlueprintsController extends Controller
       // CONVERSION: $blueprints = craft()->courier_blueprints->getAllBlueprints();
       // CONVERSION: return $this->renderTemplate('courier/blueprints', compact('blueprints'));
       $variables = [];
-      $blueprints = Courier::getInstance()->blueprints->getAllBlueprints();
 
+      $blueprints = Courier::getInstance()
+        ->blueprints
+        ->getAllBlueprints();
+
+      $eventLookup = Courier::getInstance()
+        ->events
+        ->eventIdMappingFromBlueprints($blueprints);
+
+
+
+
+
+      /*
       $blueprintEventIds = [];
 
       // Gather up all the possible Courier Event IDs so that we can make one
@@ -89,6 +101,10 @@ class BlueprintsController extends Controller
       foreach($events as $event) {
         $eventLookup[$event->id] = $event;
       }
+      */
+
+
+
 
       $variables["blueprints"] = $blueprints;
       $variables["eventLookup"] = $eventLookup;

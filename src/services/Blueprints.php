@@ -17,6 +17,7 @@ use craft\base\Component;
 use refinery\courier\records\Blueprint as Blueprint;
 use refinery\courier\models\Blueprint as BlueprintModel;
 use refinery\courier\services\ModelPopulator;
+use yii\base\Event;
 
 /**
  * @author    The Refinery
@@ -52,6 +53,19 @@ class Blueprints extends Component
 			);
 
 			return $models;
+	}
+
+	public function getEnabledBlueprints()
+	{
+		$criteria = Blueprint::find()
+			->where([
+				'enabled' => true
+			]);
+
+			return $this->getAllBlueprints($criteria);
+			// 50         $dataSourceRecord = DataSourceRecord::find()->where([
+			// 	51             'id' => $dataSourceId
+			// 	52         ])->one();
 	}
 
 	public function saveBlueprint(BlueprintModel $model)
@@ -129,5 +143,88 @@ class Blueprints extends Component
 			);
 
 		return $models[0];
+	}
+
+	public function checkEventConditions(Event $event, BlueprintModel $blueprint)
+	{
+		// var_dump($event->sender);
+		// die();
+		// $renderVariables = array_merge(compact('blueprint'), $event->params);
+		// $globalSets = craft()->globals->getAllSets();
+
+
+		$renderVariables = [];
+		$renderVariables['event'] = $event;
+		$renderVariables['sender'] = $event->sender;
+
+		// $renderVariables = array_merge(compact('blueprint'), $event->params);
+		$globalSets = \craft\elements\GlobalSet::find()
+			->anyStatus()
+			->all();
+
+		foreach ($globalSets as $globalSet) {
+			$renderVariables[$globalSet->handle] = $globalSet;
+		}
+
+		try {
+			// $eventTriggerConditions = craft()->templates->renderString($blueprint->eventTriggerConditions, $renderVariables);
+			$eventTriggerConditions = \Craft::$app
+				->view
+				->renderString($blueprint->eventTriggerConditions, $renderVariables);
+		} catch (\Exception $e) {
+			// Log here
+
+			throw new Exception($e);
+		}
+
+		$eventTriggerConditions = trim($eventTriggerConditions);
+
+		// If the trigger condition yields something other than "1" or "true", return
+		// since the trigger is not valid in this case.
+		if($eventTriggerConditions !== "1" && $eventTriggerConditions !== "true") {
+			return;
+		}
+
+		// var_dump("Event trigger successful");
+		// die();
+		// Send the email here:
+		// craft()->courier_emails->sendBlueprintEmail($blueprint, $renderVariables);
+		return;
+
+
+
+		/*
+		// Prep render variables
+		$renderVariables = array_merge(compact('blueprint'), $event->params);
+		$globalSets = craft()->globals->getAllSets();
+
+		foreach ($globalSets as $globalSet) {
+			$renderVariables[$globalSet->handle] = $globalSet;
+		}
+
+		try {
+			// Render the string with Twig
+			$eventTriggerConditions = craft()->templates->renderString($blueprint->eventTriggerConditions, $renderVariables);
+		}
+		// Template parse error
+		catch (\Exception $e) {
+			$errorMessage = $e->getMessage();
+			$error = Craft::t("Template parse error encountered while parsing field “Event Trigger Conditions” for the blueprint named “{blueprint}”:\r\n{error}", [
+				'blueprint' => $blueprint->name,
+				'error' => $errorMessage
+			]);
+			CourierPlugin::log($error, LogLevel::Error, true);
+
+			throw new Exception($error);
+		}
+
+		// Event trigger conditions were not met
+		if (trim($eventTriggerConditions) !== 'true') {
+			return;
+		}
+
+		// If everything looks all good, send the email
+		craft()->courier_emails->sendBlueprintEmail($blueprint, $renderVariables);
+		*/
 	}
 }
