@@ -55,8 +55,11 @@
 							<td data-title="Email Recipient">{{ blueprint.toEmail }}</td>
 							<td data-title="Email Subject">{{ blueprint.emailSubject }}</td>
 							<td data-title="Event Triggers">
-								{% for trigger in blueprint.eventTriggersJsonArray %}
-									{{ trigger['eventClass'] }}->{{ trigger['eventHandle'] }}
+								{% for eventTriggerId in blueprint.eventTriggersJsonArray %}
+									{% set event = eventLookup[eventTriggerId] %}
+									{% if event %}
+										{{ event.eventClass }} => {{ event.eventHandle }}<br />
+									{% endif %}
 								{% endfor %}
 							</td>
 							<td data-title="HTML Email Template Path">{{ blueprint.htmlEmailTemplatePath }}</td>

@@ -29,6 +29,7 @@ use yii\base\Exception;
 use yii\web\Response;
 use refinery\courier\records\Blueprint;
 use refinery\courier\models\Blueprint as BlueprintModel;
+use refinery\courier\records\Event as CourierEventRecord;
 
 // use barrelstrength\sproutbaseemail\models\ModalResponse;
 // use barrelstrength\sproutemail\elements\SentEmail;
@@ -53,12 +54,46 @@ class BlueprintsController extends Controller
 
     public function actionIndex(): Response
     {
-        // CONVERSION: $blueprints = craft()->courier_blueprints->getAllBlueprints();
-        // CONVERSION: return $this->renderTemplate('courier/blueprints', compact('blueprints'));
-        $variables = [];
-        $blueprints = Courier::getInstance()->blueprints->getAllBlueprints();
-        $variables["blueprints"] = $blueprints;
-        return $this->renderTemplate('courier/blueprints', $variables);
+      // CONVERSION: $blueprints = craft()->courier_blueprints->getAllBlueprints();
+      // CONVERSION: return $this->renderTemplate('courier/blueprints', compact('blueprints'));
+      $variables = [];
+      $blueprints = Courier::getInstance()->blueprints->getAllBlueprints();
+
+      $blueprintEventIds = [];
+
+      // Gather up all the possible Courier Event IDs so that we can make one
+      // database call to get them and use them in a lookup table below.
+      foreach($blueprints as $blueprint) {
+        if(!empty($blueprint->eventTriggers)) {
+          foreach($blueprint->eventTriggersJsonArray() as $eventTriggerId) {
+            array_push($blueprintEventIds, $eventTriggerId);
+          }
+        }
+      }
+
+      $blueprintEventIds = array_unique($blueprintEventIds);
+
+      // Get all Courier events by the IDs above
+      // TODO: This should probably be a service method of some kind.
+      $events = Courier::getInstance()
+        ->events
+        ->getAllEvents(
+          CourierEventRecord::find()
+            ->where(['id' => $blueprintEventIds])
+        );
+
+      // Create a lookup table (dictionary)
+      // [event id] = event model
+      $eventLookup = [];
+
+      foreach($events as $event) {
+        $eventLookup[$event->id] = $event;
+      }
+
+      $variables["blueprints"] = $blueprints;
+      $variables["eventLookup"] = $eventLookup;
+
+      return $this->renderTemplate('courier/blueprints', $variables);
     }
 
     public function actionCreate(): Response
@@ -79,7 +114,10 @@ class BlueprintsController extends Controller
       $variables['title'] = 'Create new blueprint';
       $variables['blueprint'] = new Blueprint();
       $variables['availableEvents'] = $this->buildAvailableEventsCheckboxOptions(
-        Courier::getInstance()->settings->availableEvents
+        // Courier::getInstance()->settings->availableEvents
+        Courier::getInstance()
+          ->events
+          ->getAllEvents()
       );
       return $this->renderTemplate('courier/_blueprint', $variables);
     }
@@ -89,19 +127,20 @@ class BlueprintsController extends Controller
       $options = [];
       foreach($availableEvents as $availableEvent)
       {
-        if($availableEvent['enabled'])
-        {
+        // if($availableEvent['enabled'])
+        // {
           $option = array(
             "label" => "Class: <b>{$availableEvent["eventClass"]}</b>, Handle: <b>{$availableEvent["eventHandle"]}</b>",
-            "value" => json_encode(
-              array(
-                "eventClass" => $availableEvent["eventClass"],
-                "eventHandle" => $availableEvent["eventHandle"],
-              )
-            ),
+            "value" => $availableEvent->id
+            // "value" => json_encode(
+            //   array(
+            //     "eventClass" => $availableEvent["eventClass"],
+            //     "eventHandle" => $availableEvent["eventHandle"],
+            //   )
+            // ),
           );
           array_push($options, $option);
-        }
+        // }
       }
 
       return $options;
@@ -165,7 +204,8 @@ class BlueprintsController extends Controller
       Craft::$app->getSession()->setNotice(Craft::t('courier', 'Blueprint saved.'));
 
       // Saved, success!
-      return $this->redirectToPostedUrl($blueprint);
+      // return $this->redirectToPostedUrl($blueprint);
+      return $this->redirect("courier/blueprints");
     }
 
     /**
