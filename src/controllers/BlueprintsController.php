@@ -221,9 +221,37 @@ class BlueprintsController extends Controller
         'variables'
       ]);
 
+
+
+
+
+
+
+
+
+
+
+
+      // $variables['availableEvents'] = $this->buildAvailableEventsCheckboxOptions(
+      //   Courier::getInstance()->settings->availableEvents
+      // );
+
       $variables['availableEvents'] = $this->buildAvailableEventsCheckboxOptions(
-        Courier::getInstance()->settings->availableEvents
+        // Courier::getInstance()->settings->availableEvents
+        Courier::getInstance()
+          ->events
+          ->getAllEvents()
       );
+
+
+
+
+
+
+
+
+
+
 
       // Get blueprint by id if it is not loaded already
       if (empty($variables['blueprint'])) {

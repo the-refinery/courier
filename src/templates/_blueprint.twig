@@ -155,15 +155,13 @@
 		}) }}
 	</div>
 
-	{{ blueprint.eventTriggers }}
-
 	<div id="event" class="hidden">
 		{{ forms.checkboxSelectField({
 			label: 'Event Triggers'|t,
 			instructions: "Choose which events will trigger this blueprint's email to be sent."|t,
 			name: 'eventTriggers',
 			id: 'eventTriggers',
-			values: ["{\"eventClass\":\"Entry\",\"eventHandle\":\"Entry::EVENT_BEFORE_SAVE\"}"],
+			values: blueprint.eventTriggers,
 			options: availableEvents,
 			showAllOption: false,
 			required: true,
