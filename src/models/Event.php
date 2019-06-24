@@ -74,14 +74,10 @@ class Event extends Model
     //     return $triggers;
     // }
 
-    /**
-     * @inheritdoc
-     */
-    // public function rules()
-    // {
-    //     return [
-    //         ['someAttribute', 'string'],
-    //         ['someAttribute', 'default', 'value' => 'Some Default'],
-    //     ];
-    // }
+    public function rules()
+    {
+        $rules = parent::rules();
+        $rules[] = [['eventClass', 'eventHandle'], 'required'];
+        return $rules;
+    }
 }

@@ -49,9 +49,10 @@
 			instructions: 'The handle associated with the Event.'|t,
 			id: 'eventHandle',
 			name: 'eventHandle',
+			required: true,
 			value: event.eventHandle,
 			autocomplete: false,
-			errors: event.getErrors('eventClass'),
+			errors: event.getErrors('eventHandle'),
 		}) }}
 		{{ forms.textField({
 			label: 'Event Description'|t,

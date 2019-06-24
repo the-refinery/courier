@@ -25,28 +25,20 @@ class Events extends Component
 	{
 		if ($eventModel->id){
 			$record = CourierEventRecord::findOne($eventModel->id);
-		}
-		else {
+		} else {
 			$record = new CourierEventRecord();
+		}
+
+		$eventModel->validate();
+
+		if($eventModel->hasErrors()) {
+			return false;
 		}
 
 		$record->eventHandle 	= $eventModel->eventHandle;
 		$record->eventClass		= $eventModel->eventClass;
 		$record->description 	= $eventModel->description;
 		$record->enabled 			= $eventModel->enabled;
-
-		if(empty($record->enabled))
-		{
-			$record->enabled = false;
-		}
-
-		$record->validate();
-
-		$eventModel->addErrors($record->getErrors());
-
-		if ($eventModel->hasErrors()) {
-			return false;
-		}
 
 		$record->save(false);
 		$eventModel->id = $record->id;

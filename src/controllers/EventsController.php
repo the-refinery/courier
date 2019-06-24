@@ -52,13 +52,15 @@ class EventsController extends Controller
     $eventModel->enabled      = $request->getParam('enabled', $eventModel->enabled);
 
     if (!Courier::getInstance()->events->saveEvent($eventModel)) {
-      Craft::$app->getSession()->setError(Craft::t('courier', 'Couldn’t save blueprint.'));
+      Craft::$app->getSession()->setError(Craft::t('courier', 'Couldn’t save event.'));
 
       Craft::$app->getUrlManager()->setRouteParams([
         'event' => $eventModel,
       ]);
 
-      return null;
+      return $this->renderTemplate('courier/_event', [
+        'event' => $eventModel,
+      ]);
     }
 
     Craft::$app->getSession()->setNotice(Craft::t('courier', 'Event saved.'));
