@@ -69,6 +69,13 @@ class Blueprint extends Model
         return $triggers;
     }
 
+    public function rules()
+    {
+        $rules = parent::rules();
+        $rules[] = [['name', 'htmlEmailTemplatePath', 'emailSubject', 'fromEmail', 'eventTriggers', 'eventTriggerConditions'], 'required'];
+        return $rules;
+    }
+
     /**
      * @inheritdoc
      */

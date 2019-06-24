@@ -44,73 +44,55 @@ class Blueprints extends Component
 			->all();
 
 		// CONVERSION: $models = Courier_DeliveryModel::populateModels($records);
-        $models = $this->populateModels($records);
+		$models = Courier::getInstance()
+			->modelPopulator
+			->populateModels(
+				$records,
+				\refinery\courier\models\Blueprint::class
+			);
 
-		return $models;
+			return $models;
 	}
-
-    private function populateModels(array $records): array
-    {
-        $models = [];
-
-        if (!empty($records)) {
-            foreach ($records as $record) {
-                $recordAttributes = $record->getAttributes();
-
-                $model = new BlueprintModel();
-                $model->setAttributes($recordAttributes, false);
-                $models[] = $model;
-            }
-        }
-
-        return $models;
-    }
 
 	public function saveBlueprint(BlueprintModel $model)
 	{
-        // Load existing record from id, or create a new one
-        /*
 		if ($model->id)
-			$record = Courier_BlueprintRecord::model()->findById($model->id);
-		else {
-			$record = new Courier_BlueprintRecord();
-        }
-        */
-
-		if ($model->id)
-			// $record = BlueprintModel::findById($model->id);
 			$record = Blueprint::findOne($model->id);
 		else {
 			$record = new Blueprint();
-        }
+		}
 
-		// Populate the blueprint record
-		$record->name 					= $model->name;
-		$record->description 			= $model->description;
-		$record->htmlEmailTemplatePath 	= $model->htmlEmailTemplatePath;
-		$record->textEmailTemplatePath 	= $model->textEmailTemplatePath;
-		$record->enabled 				= $model->enabled;
-		$record->emailSubject 			= $model->emailSubject;
-		$record->toEmail 				= $model->toEmail;
-		$record->toName 				= $model->toName;
-		$record->fromEmail 				= $model->fromEmail;
-		$record->fromName 				= $model->fromName;
-		$record->replyToEmail			= $model->replyToEmail;
-		$record->ccEmail 				= $model->ccEmail;
-		$record->bccEmail 				= $model->bccEmail;
-		$record->eventTriggers 			= $model->eventTriggers;
-		$record->eventTriggerConditions = $model->eventTriggerConditions;
+		$model->validate();
 
-		$record->validate();
-		$model->addErrors($record->getErrors());
-		// Fail validation if there were errors on the model or reocrd
 		if ($model->hasErrors()) {
 			return false;
 		}
 
-		// Save the record to the DB
+		// Populate the blueprint record
+		$record->name 					= $model->name;
+		$record->description 		= $model->description;
+		$record->enabled 				= $model->enabled;
+		$record->emailSubject 	= $model->emailSubject;
+		$record->toEmail 				= $model->toEmail;
+		$record->toName 				= $model->toName;
+		$record->fromEmail 			= $model->fromEmail;
+		$record->fromName 			= $model->fromName;
+		$record->replyToEmail		= $model->replyToEmail;
+		$record->ccEmail 				= $model->ccEmail;
+		$record->bccEmail 			= $model->bccEmail;
+		$record->eventTriggers	= $model->eventTriggers;
+		$record->htmlEmailTemplatePath 	= $model->htmlEmailTemplatePath;
+		$record->textEmailTemplatePath 	= $model->textEmailTemplatePath;
+		$record->eventTriggerConditions = $model->eventTriggerConditions;
+
+		// $record->validate();
+		// $model->addErrors($record->getErrors());
+		// // Fail validation if there were errors on the model or reocrd
+		// if ($model->hasErrors()) {
+		// 	return false;
+		// }
+
 		$record->save(false);
-		// Save the record id to the model
 		$model->id = $record->id;
 
 		return true;

@@ -150,29 +150,24 @@ class BlueprintsController extends Controller
     {
       $this->requirePostRequest();
 
-      // $blueprint = new Courier_BlueprintModel();
       $blueprint = new BlueprintModel();
-        // var_dump($blueprint);
-        // die();
-
-      // $request = craft()->getRequest();
       $request = Craft::$app->getRequest();
 
       $blueprint->id 						= $request->getParam('blueprintId', $blueprint->id);
       $blueprint->name 					= $request->getParam('name', $blueprint->name);
-      $blueprint->description 			= $request->getParam('description', $blueprint->description);
+      $blueprint->description 	= $request->getParam('description', $blueprint->description);
+      $blueprint->enabled 			= $request->getParam('enabled', $blueprint->enabled);
+      $blueprint->emailSubject 	= $request->getParam('emailSubject', $blueprint->emailSubject);
+      $blueprint->toEmail 			= $request->getParam('toEmail', $blueprint->toEmail);
+      $blueprint->toName 				= $request->getParam('toName', $blueprint->toName);
+      $blueprint->fromEmail 		= $request->getParam('fromEmail', $blueprint->fromEmail);
+      $blueprint->fromName 			= $request->getParam('fromName', $blueprint->fromName);
+      $blueprint->replyToEmail	= $request->getParam('replyToEmail', $blueprint->replyToEmail);
+      $blueprint->ccEmail 			= $request->getParam('ccEmail', $blueprint->ccEmail);
+      $blueprint->bccEmail 			= $request->getParam('bccEmail', $blueprint->bccEmail);
+      $blueprint->eventTriggers = $request->getParam('eventTriggers', $blueprint->eventTriggers);
       $blueprint->htmlEmailTemplatePath 	= $request->getParam('htmlEmailTemplatePath', $blueprint->htmlEmailTemplatePath);
       $blueprint->textEmailTemplatePath 	= $request->getParam('textEmailTemplatePath', $blueprint->textEmailTemplatePath);
-      $blueprint->enabled 				= $request->getParam('enabled', $blueprint->enabled);
-      $blueprint->emailSubject 			= $request->getParam('emailSubject', $blueprint->emailSubject);
-      $blueprint->toEmail 				= $request->getParam('toEmail', $blueprint->toEmail);
-      $blueprint->toName 					= $request->getParam('toName', $blueprint->toName);
-      $blueprint->fromEmail 				= $request->getParam('fromEmail', $blueprint->fromEmail);
-      $blueprint->fromName 				= $request->getParam('fromName', $blueprint->fromName);
-      $blueprint->replyToEmail			= $request->getParam('replyToEmail', $blueprint->replyToEmail);
-      $blueprint->ccEmail 				= $request->getParam('ccEmail', $blueprint->ccEmail);
-      $blueprint->bccEmail 				= $request->getParam('bccEmail', $blueprint->bccEmail);
-      $blueprint->eventTriggers 			= $request->getParam('eventTriggers', $blueprint->eventTriggers);
       $blueprint->eventTriggerConditions 	= $request->getParam('eventTriggerConditions', $blueprint->eventTriggerConditions);
 
       // Validate and save the blueprint
@@ -186,25 +181,27 @@ class BlueprintsController extends Controller
       */
 
       if (!Courier::getInstance()->blueprints->saveBlueprint($blueprint)) {
-        // craft()->userSession->setError(Craft::t('Couldn’t save blueprint.'));
         Craft::$app->getSession()->setError(Craft::t('courier', 'Couldn’t save blueprint.'));
 
-        // Send the invalid blueprint back to the template
-        // Send the settings back to the template
+        $availableEvents = $this->buildAvailableEventsCheckboxOptions(
+          Courier::getInstance()
+            ->events
+            ->getAllEvents()
+        );
+
         Craft::$app->getUrlManager()->setRouteParams([
-            'blueprint' => $blueprint,
+          'blueprint' => $blueprint,
+          'availableEvents' => $availableEvents
         ]);
 
-        return null;
-
-        // return craft()->urlManager->setRouteVariables(['blueprint' => $blueprint]);
+        return $this->renderTemplate('courier/_blueprint', [
+          'blueprint' => $blueprint,
+          'availableEvents' => $availableEvents
+        ]);
       }
 
-      // craft()->userSession->setNotice(Craft::t('Blueprint saved.'));
       Craft::$app->getSession()->setNotice(Craft::t('courier', 'Blueprint saved.'));
 
-      // Saved, success!
-      // return $this->redirectToPostedUrl($blueprint);
       return $this->redirect("courier/blueprints");
     }
 
@@ -216,82 +213,28 @@ class BlueprintsController extends Controller
      */
     public function actionEdit() : Response
     {
-      // $variables = craft()->urlManager->getRouteParams()['variables'];
       $variables = Craft::$app->getUrlManager()->getRouteParams([
         'variables'
       ]);
 
-
-
-
-
-
-
-
-
-
-
-
-      // $variables['availableEvents'] = $this->buildAvailableEventsCheckboxOptions(
-      //   Courier::getInstance()->settings->availableEvents
-      // );
-
       $variables['availableEvents'] = $this->buildAvailableEventsCheckboxOptions(
-        // Courier::getInstance()->settings->availableEvents
         Courier::getInstance()
           ->events
           ->getAllEvents()
       );
 
-
-
-
-
-
-
-
-
-
-
       // Get blueprint by id if it is not loaded already
       if (empty($variables['blueprint'])) {
-        // $variables['blueprint'] = craft()->courier_blueprints->getBlueprintById($variables['id']);
-
-
-        // TRY TO EDIT AND GET MODELS TO WORK HERE
-        // also figure out how to get the checkboxes to popoulate correctly for events on edit/new page
-        // TRY TO EDIT AND GET MODELS TO WORK HERE
-        // TRY TO EDIT AND GET MODELS TO WORK HERE
-        // TRY TO EDIT AND GET MODELS TO WORK HERE
-        // TRY TO EDIT AND GET MODELS TO WORK HERE
-        // TRY TO EDIT AND GET MODELS TO WORK HERE
-        // TRY TO EDIT AND GET MODELS TO WORK HERE
-        // TRY TO EDIT AND GET MODELS TO WORK HERE
-        // TRY TO EDIT AND GET MODELS TO WORK HERE
-        // TRY TO EDIT AND GET MODELS TO WORK HERE
-        // TRY TO EDIT AND GET MODELS TO WORK HERE
         $variables['blueprint'] = Courier::getInstance()
           ->blueprints
           ->getBlueprintById($variables['id']);
       }
-
-      // var_dump($variables['availableEvents']);
-      // var_dump("<br />");
-      // var_dump("<br />");
-      // var_dump("<br />");
-      // var_dump("<br />");
-      // var_dump("<br />");
-      // var_dump("<br />");
-      // var_dump($variables['blueprint']->eventTriggers);
-      // die();
 
       // Could not find requested Blueprint
       if ($variables['blueprint'] === null) {
         throw new HttpException(404);
       }
 
-      // var_dump($variables['blueprint']);
-      // die();
       $variables['title'] = $variables['blueprint']->name;
 
       return $this->renderTemplate('courier/_blueprint', $variables);
