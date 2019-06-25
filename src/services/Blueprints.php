@@ -189,6 +189,13 @@ class Blueprints extends Component
 		// die();
 		// Send the email here:
 		// craft()->courier_emails->sendBlueprintEmail($blueprint, $renderVariables);
+		$models = Courier::getInstance()
+			->emails
+			->sendBlueprintEmail(
+				$blueprint,
+				$renderVariables
+			);
+
 		return;
 
 
