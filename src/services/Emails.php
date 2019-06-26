@@ -15,6 +15,7 @@ use refinery\courier\Courier;
 use Craft;
 use craft\base\Component;
 use refinery\courier\models\Blueprint as BlueprintModel;
+use refinery\courier\events\BlueprintEmailEvent;
 use craft\mail\Message;
 use yii\base\Event;
 
@@ -67,7 +68,7 @@ class Emails extends Component
 			$resultEventParams['error'] = $error;
 
 			// Fire a new onBlueprintEmailFailedEvent
-			$event = new Event($this, $resultEventParams);
+			$event = new BlueprintEmailEvent($this, $resultEventParams);
 			$this->onAfterBlueprintEmailFailed($event);
 
 			return false;
@@ -87,7 +88,12 @@ class Emails extends Component
 			$this->onAfterBlueprintEmailSent($event);
 			*/
 
-			$event = new Event();
+			// $event = new Event();
+			$event = new BlueprintEmailEvent([
+				'blueprint' => $blueprint,
+				'renderVariables' => $renderVariables,
+				'success' => true
+			]);
 
 			$this->onAfterBlueprintEmailSent($event);
 
@@ -108,14 +114,24 @@ class Emails extends Component
 
 
 		} else {
-			$error = Craft::t("Unknown error occurred when attempting to send email for “{blueprint}”.\r\nCheck your Craft log for more details.", [
-				'blueprint' => $blueprint->name,
-			]);
-			CourierPlugin::log($error, LogLevel::Error);
-			$resultEventParams['error'] = $error;
+			// Log here
+			// $error = Craft::t("Unknown error occurred when attempting to send email for “{blueprint}”.\r\nCheck your Craft log for more details.", [
+			// 	'blueprint' => $blueprint->name,
+			// ]);
+			// CourierPlugin::log($error, LogLevel::Error);
+			// $resultEventParams['error'] = $error;
 
-			// Fire a new onBlueprintEmailFailedEvent
-			$event = new Event($this, $resultEventParams);
+			// // Fire a new onBlueprintEmailFailedEvent
+			// $event = new Event($this, $resultEventParams);
+			// $this->onAfterBlueprintEmailFailed($event);
+			$error = "Unknown error occurred when attempting to send email for '{$blueprint->name}'.\r\nCheck your Craft log for more details.";
+			$event = new BlueprintEmailEvent([
+				'blueprint' => $blueprint,
+				'renderVariables' => $renderVariables,
+				'success' => false,
+				'errorMessage' => $error
+			]);
+
 			$this->onAfterBlueprintEmailFailed($event);
 		}
 
@@ -139,17 +155,9 @@ class Emails extends Component
 		$this->trigger(self::EVENT_AFTER_BLUEPRINT_EMAIL_SENT, $event);
 	}
 
-	/**
-	 * Fire the event "onAfterBlueprintEmailFailed"
-	 *
-	 * @param Event $event
-	 *
-	 * @return void
-	 */
 	public function onAfterBlueprintEmailFailed(Event $event)
 	{
-		// 152         $this->trigger(self::EVENT_BEFORE_PUSH, $event);
-		$this->raiseEvent('onAfterBlueprintEmailFailed', $event);
+		$this->trigger(self::EVENT_AFTER_BLUEPRINT_EMAIL_FAILED, $event);
 	}
 
 	// Private Methods

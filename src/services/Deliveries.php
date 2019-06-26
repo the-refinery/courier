@@ -17,6 +17,7 @@ use craft\base\Component;
 use yii\base\Event;
 use refinery\courier\records\Delivery as Delivery;
 use refinery\courier\models\Delivery as DeliveryModel;
+use craft\db\Query;
 
 /**
  * @author    The Refinery
@@ -80,21 +81,36 @@ class Deliveries extends Component
 	 */
 	public function createDelivery(Event $event)
 	{
-		$params = $event->params;
+		// $params = $event->params;
 		$recipients = '';
+		$blueprint = $event->blueprint;
+		// var_dump($blueprint->toEmail);
+		// die();
 
 		// Do we have an Email model?
-		if (isset($params['email'])) {
-			$toEmail = $params['email']['toEmail'];
+		// if (isset($params['email'])) {
+		// 	$toEmail = $params['email']['toEmail'];
+		// 	$recipients = is_array($toEmail) ? $this->_convertEmailArrayToString($toEmail) : $toEmail;
+		// }
+
+		if(isset($blueprint->toEmail)) {
+			$toEmail = $blueprint->toEmail;
 			$recipients = is_array($toEmail) ? $this->_convertEmailArrayToString($toEmail) : $toEmail;
 		}
 
+		/*
 		$delivery = new Courier_DeliveryModel();
 		$delivery->blueprintId 	 = $params['blueprint']->id;
 		$delivery->toEmail 		 = $recipients;
 		$delivery->success 		 = isset($params['success']) ? $params['success'] : false;
 		$delivery->errorMessages = isset($params['error']) ? $params['error'] : '';
+		*/
 
+		$delivery = new DeliveryModel();
+		$delivery->blueprintId = $blueprint->id;
+		$delivery->toEmail 		 = $recipients;
+		$delivery->success 		 = $event->success;
+		$delivery->errorMessages = $event->errorMessage;
 
 		// Save the delivery record
 		$delivery->id = $this->_saveDelivery($delivery);
@@ -132,20 +148,42 @@ class Deliveries extends Component
 	public function enforceDeliveriesLimit($deliveriesLimit = null)
 	{
 		if (!$deliveriesLimit) {
-			$deliveriesLimit = craft()->plugins->getPlugin('courier')->getSettings()->deliveriesRecordLimit;
+			// $deliveriesLimit = craft()->plugins->getPlugin('courier')->getSettings()->deliveriesRecordLimit;
+			$deliveriesLimit = Courier::getInstance()
+				->settings
+				->deliveriesRecordLimit;
 		}
-		$deliveriesCount = count(Courier_DeliveryRecord::model()->findAll());
+
+    $deliveriesCount = (int) (new Query())
+			->select('count(*)')
+			->from(Delivery::tableName())
+			->scalar();
+
+		// $deliveriesCount = count(Courier_DeliveryRecord::model()->findAll());
 
 		// Proceed only if limit was reached
 		if (!($deliveriesCount > $deliveriesLimit)) {
 			return;
 		}
 
-		// Delete the excess deliveries
-		Courier_DeliveryRecord::model()->deleteAll([
-			'order' => 'dateCreated ASC',
-			'limit' => $deliveriesCount - $deliveriesLimit
-		]);
+		// Create a custom query in which to execute a DELETE FROM. Turns out
+		// Yii2 does not allow order/limit conditions on a deleteAll() command.
+		$deliveriesTable = Craft::$app
+			->getDb()
+			->getSchema()
+			->getRawTableName(Delivery::tableName());
+
+		$deleteLimit = $deliveriesCount - $deliveriesLimit;
+
+		// There is very little risk of the tableName undergoing an SQL injection attack,
+		// so string injection for the table name should be sufficient.
+		$dbCommand = Craft::$app
+			->getDb()
+			->createCommand("DELETE FROM {$deliveriesTable} ORDER BY dateCreated ASC limit :deleteLimit");
+
+		$dbCommand->bindParam(':deleteLimit', $deleteLimit);
+		$dbCommand->execute();
+
 	}
 
 	// Private Methods
@@ -156,27 +194,28 @@ class Deliveries extends Component
 	 *
 	 * @return int|null $deliveryId
 	 */
-	private function _saveDelivery(Courier_DeliveryModel $deliveryModel)
+	private function _saveDelivery(DeliveryModel $deliveryModel)
 	{
 		if (!$deliveryModel->validate()) {
 			// Validation errors to string
 			$errors = array_column($deliveryModel->getErrors(), 0);
 			$errors = implode(' ', $errors);
-			$error = Craft::t('Could not create delivery for blueprint “{blueprint}”. Errors: “{errors}”', [
-				'blueprint' => $event->blueprint->name,
-				'errors' => $errors,
-			]);
-			Craft::error($error, LogLevel::Error);
+			// Log here
+			// $error = Craft::t('Could not create delivery for blueprint “{blueprint}”. Errors: “{errors}”', [
+			// 	'blueprint' => $event->blueprint->name,
+			// 	'errors' => $errors,
+			// ]);
+			// Craft::error($error, LogLevel::Error);
 
 			return null;
 		}
 
-		$deliveryRecord = new Courier_DeliveryRecord();
+		$deliveryRecord = new Delivery();
 
-		$deliveryRecord->blueprintId  		= $deliveryModel->blueprintId;
-		$deliveryRecord->toEmail 			= $deliveryModel->toEmail;
-		$deliveryRecord->success 			= $deliveryModel->success;
-		$deliveryRecord->errorMessages 		= $deliveryModel->errorMessages;
+		$deliveryRecord->blueprintId  	= $deliveryModel->blueprintId;
+		$deliveryRecord->toEmail 				= $deliveryModel->toEmail;
+		$deliveryRecord->success 				= $deliveryModel->success;
+		$deliveryRecord->errorMessages	= $deliveryModel->errorMessages;
 
 		// Save the record to the DB
 		$deliveryRecord->save(false);
