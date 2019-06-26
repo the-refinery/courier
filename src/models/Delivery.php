@@ -31,31 +31,20 @@ class Delivery extends Model
     // public $someAttribute = 'Some Default';
     // public $fullName;
     public $id;
+    public $uid;
     public $blueprintId;
     public $toEmail;
     public $errorMessages;
     public $success;
     public $dateCreated;
     public $dateUpdated;
-
-    // Public Methods
-    // =========================================================================
+    public $blueprint;
 
     public function rules()
     {
-        $rules = parent::rules();
-        $rules[] = [['blueprintId'], 'required'];
-        return $rules;
+        return [
+            [['blueprintId'], 'required'],
+            [['id', 'toEmail', 'errorMessages', 'success', 'dateCreated', 'dateUpdated', 'uid', 'blueprint'], 'safe']
+        ];
     }
-
-    /**
-     * @inheritdoc
-     */
-    // public function rules()
-    // {
-    //     return [
-    //         ['someAttribute', 'string'],
-    //         ['someAttribute', 'default', 'value' => 'Some Default'],
-    //     ];
-    // }
 }

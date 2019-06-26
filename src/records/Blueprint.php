@@ -14,6 +14,7 @@ use refinery\courier\Courier;
 
 use Craft;
 use craft\db\ActiveRecord;
+use refinery\courier\records\Delivery;
 
 /**
  * @author    The Refinery
@@ -48,4 +49,11 @@ class Blueprint extends ActiveRecord
         return true;
     }
 
+    public function getDeliveries(): ActiveQueryInterface
+    {
+        return $this->hasMany(
+            Delivery::class,
+            ['blueprintId' => 'id']
+        );
+    }
 }

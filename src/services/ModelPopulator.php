@@ -30,6 +30,14 @@ class ModelPopulator extends Component
 		$models = [];
 
 		if (!empty($records)) {
+			foreach($records as $record) {
+				$model = new $targetModelClass();
+				$modelAttributes = array_keys($model->getAttributes());
+				$recordAttributes = $record->getAttributes($modelAttributes);
+				$model->setAttributes($recordAttributes);
+				$models[] = $model;
+			}
+			/*
 				foreach ($records as $record) {
 						$recordAttributes = $record->getAttributes();
 
@@ -38,6 +46,7 @@ class ModelPopulator extends Component
 						$model->setAttributes($recordAttributes, false);
 						$models[] = $model;
 				}
+			*/
 		}
 
 		return $models;

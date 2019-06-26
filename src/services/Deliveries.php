@@ -17,6 +17,7 @@ use craft\base\Component;
 use yii\base\Event;
 use refinery\courier\records\Delivery as Delivery;
 use refinery\courier\models\Delivery as DeliveryModel;
+use refinery\courier\services\ModelPopulator;
 use craft\db\Query;
 
 /**
@@ -45,33 +46,55 @@ class Deliveries extends Component
 			$criteria = Delivery::find();
 		}
 
-		// $records = Delivery::findAll($criteria)
+		// $records = Delivery::find($criteria)
 		$records = $criteria
-			->with(['blueprint'])
+			->with('blueprint')
 			->all();
 
 		// CONVERSION: $models = Courier_DeliveryModel::populateModels($records);
-    $models = $this->populateModels($records);
+		// $models = $this->populateModels($records);
+		$models = Courier::getInstance()
+			->modelPopulator
+			->populateModels(
+				$records,
+				\refinery\courier\models\Delivery::class
+			);
 
 		return $models;
+		// return $records;
 	}
-
+/*
     private function populateModels(array $records): array
     {
         $models = [];
 
         if (!empty($records)) {
-            foreach ($records as $record) {
-                $recordAttributes = $record->getAttributes();
-                $model = new DeliveryModel();
-                $model->setAttributes($recordAttributes);
+					foreach($records as $record) {
+						$model = new DeliveryModel();
+						$modelAttributes = array_keys($model->getAttributes());
+						// var_dump($modelAttributes);
+						// die();
 
-                $models[] = $model;
-            }
+						$recordAttributes = $record->getAttributes($modelAttributes);
+						$model->setAttributes($recordAttributes);
+            $models[] = $model;
+					}
+            // foreach ($records as $record) {
+						// 		$recordAttributes = $record->getAttributes();
+            //     // $model = new DeliveryModel();
+						// 		// var_dump($model->getAttributes());
+						// 		// die();
+            //     $model = new DeliveryModel();
+            //     $model->setAttributes($recordAttributes);
+
+            //     $models[] = $model;
+						// }
         }
 
         return $models;
-    }
+		}
+*/
+
 	/**
 	 * Create and save a delivery to record and keep track of a blueprint email that was sent
 	 *

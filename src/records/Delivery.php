@@ -15,6 +15,7 @@ use refinery\courier\Courier;
 use Craft;
 use craft\db\ActiveRecord;
 use refinery\courier\records\Blueprint;
+use yii\db\ActiveQueryInterface;
 
 /**
  * @author    The Refinery
