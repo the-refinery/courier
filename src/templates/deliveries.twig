@@ -22,16 +22,13 @@
 
 {% block content %}
 	<h2>{{ "Deliveries"|t }}</h2>
-	<p id="no-deliveries"{% if deliveries|length %} class="hidden"{% endif %}>
-		{{ "No deliveries have been recorded at this time."|t }}
-	</p>
-	{% if deliveries|length %}
+	{% if deliveries is defined and deliveries|length %}
 		<div id="has-deliveries">
 			{% import "_includes/forms" as forms %}
 			<form class="courier-toolbar--right" method="post" action="" accept-charset="UTF-8">
 				{{ getCsrfInput() }}
 				<input type="hidden" name="redirect" value="courier/deliveries">
-				<input type="hidden" name="action" value="courier/deliveries/deleteAll">
+				<input type="hidden" name="action" value="courier/deliveries/delete-all">
 				<input type="submit" class="btn submit" value="Clear All">
 			</form>
 			<table class="data fullwidth" id="deliveries">
@@ -77,6 +74,10 @@
 				</tbody>
 			</table>
 		</div>
+	{% else %}
+		<p id="no-deliveries">
+			{{ "No deliveries have been recorded at this time."|t }}
+		</p>
 	{% endif %}
 {% endblock %}
 

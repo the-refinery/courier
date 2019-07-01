@@ -165,7 +165,7 @@ class Deliveries extends Component
 	 */
 	public function deleteAllDeliveries($criteria = [])
 	{
-		return (bool) Courier_DeliveryRecord::model()->deleteAll($criteria);
+		return Delivery::deleteAll();
 	}
 
 	/**

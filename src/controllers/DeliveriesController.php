@@ -83,6 +83,50 @@ class DeliveriesController extends Controller
       ]);
     }
 
+    public function actionDeleteAll(): Response
+    {
+      // Try to delete deliveries
+      /*
+      if (!craft()->courier_deliveries->deleteAllDeliveries()) {
+        craft()->userSession->setError(Craft::t('Something went wrong! Could not clear the delivery records.'));
+        return null;
+      }
+
+      craft()->userSession->setNotice(Craft::t('Successfully cleared the delivery records.'));
+
+      return $this->redirectToPostedUrl();
+      */
+
+      // $this->requirePostRequest();
+      $message = "";
+
+      try {
+        $result = Courier::getInstance()
+          ->deliveries
+          ->deleteAllDeliveries();
+
+        $message = Craft::t(
+          'courier',
+          'All deliveries deleted successfully.'
+        );
+      } catch(\Exception $e) {
+        // Log here
+
+        $message = Craft::t(
+          'courier',
+          'There was a problem removing all deliveries. Please see log file for details.'
+        );
+      }
+
+      Craft::$app
+        ->getSession()
+        ->setNotice(
+          $message
+        );
+
+      return $this->renderTemplate('courier/deliveries');
+    }
+
 
 
 
