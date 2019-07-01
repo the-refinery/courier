@@ -146,7 +146,14 @@ class Deliveries extends Component
 	 */
 	public function deleteDeliveryById($id)
 	{
-		return (bool) Courier_DeliveryRecord::model()->deleteByPk($id);
+    $record = Delivery::findOne($id);
+    $result = false;
+
+    if ($record) {
+      $result = $record->delete();
+    }
+
+    return $result;
 	}
 
 	/**

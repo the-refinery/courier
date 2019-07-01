@@ -67,6 +67,27 @@ class DeliveriesController extends Controller
       return $this->renderTemplate('courier/deliveries', $variables);
     }
 
+    public function actionDelete(): Response
+    {
+      $this->requirePostRequest();
+      $request = Craft::$app->getRequest();
+
+      $id = $request->getParam("id");
+
+      $result = Courier::getInstance()
+        ->deliveries
+        ->deleteDeliveryById($id);
+
+      return $this->asJson([
+        'success' => $result
+      ]);
+    }
+
+
+
+
+
+
     /**
      * Shows the asset volume list.
      *
