@@ -174,8 +174,11 @@ class Blueprints extends Component
 		} catch (\Exception $e) {
 			// Log here
 
-			throw new Exception($e);
+			throw new \Exception($e);
 		}
+
+		// var_dump($eventTriggerConditions);
+		// die();
 
 		$eventTriggerConditions = trim($eventTriggerConditions);
 

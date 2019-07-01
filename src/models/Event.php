@@ -37,6 +37,8 @@ class Event extends Model
     public $eventHandle;
     public $description;
     public $enabled;
+    public $dateCreated;
+    public $dateUpdated;
     // public $name;
     // public $fromName = "";
     // public $htmlEmailTemplatePath;
@@ -76,8 +78,13 @@ class Event extends Model
 
     public function rules()
     {
-        $rules = parent::rules();
-        $rules[] = [['eventClass', 'eventHandle'], 'required'];
-        return $rules;
+        // $rules = parent::rules();
+        // $rules[] = [['eventClass', 'eventHandle'], 'required'];
+        // return $rules;
+
+        return [
+            [['eventClass', 'eventHandle'], 'required'],
+            [['id', 'uid', 'eventClass', 'eventHandle', 'description', 'enabled', 'createCreated', 'dateUpdated'], 'safe']
+        ];
     }
 }

@@ -71,19 +71,43 @@ class Blueprint extends Model
 
     public function rules()
     {
-        $rules = parent::rules();
-        $rules[] = [['name', 'htmlEmailTemplatePath', 'emailSubject', 'fromEmail', 'eventTriggers', 'eventTriggerConditions'], 'required'];
-        return $rules;
-    }
+        return [
+            // Required fields
+            [
+                [
+                    'name',
+                    'htmlEmailTemplatePath',
+                    'emailSubject',
+                    'fromEmail',
+                    'eventTriggers',
+                    'eventTriggerConditions'
+                ],
+                'required'
+            ],
 
-    /**
-     * @inheritdoc
-     */
-    // public function rules()
-    // {
-    //     return [
-    //         ['someAttribute', 'string'],
-    //         ['someAttribute', 'default', 'value' => 'Some Default'],
-    //     ];
-    // }
+            // Safe fields
+            [
+                [
+                    'id',
+                    'name',
+                    'fromName',
+                    'htmlEmailTemplatePath',
+                    'toEmail',
+                    'fromEmail',
+                    'emailSubject',
+                    'toName',
+                    'replyToEmail',
+                    'ccEmail',
+                    'bccEmail',
+                    'textEmailTemplatePath',
+                    'description',
+                    'eventTriggerConditions',
+                    'eventTriggers',
+                    'enabled',
+                ],
+                'safe'
+            ]
+        ];
+
+    }
 }
