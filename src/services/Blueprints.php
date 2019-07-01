@@ -17,6 +17,7 @@ use craft\base\Component;
 use refinery\courier\records\Blueprint as Blueprint;
 use refinery\courier\models\Blueprint as BlueprintModel;
 use refinery\courier\services\ModelPopulator;
+use refinery\courier\queue\jobs\SendCourierEmailJob;
 use yii\base\Event;
 
 /**
@@ -152,7 +153,6 @@ class Blueprints extends Component
 		// $renderVariables = array_merge(compact('blueprint'), $event->params);
 		// $globalSets = craft()->globals->getAllSets();
 
-
 		$renderVariables = [];
 		$renderVariables['event'] = $event;
 		$renderVariables['sender'] = $event->sender;
@@ -177,9 +177,6 @@ class Blueprints extends Component
 			throw new \Exception($e);
 		}
 
-		// var_dump($eventTriggerConditions);
-		// die();
-
 		$eventTriggerConditions = trim($eventTriggerConditions);
 
 		// If the trigger condition yields something other than "1" or "true", return
@@ -188,20 +185,15 @@ class Blueprints extends Component
 			return;
 		}
 
-		// var_dump("Event trigger successful");
-		// die();
-		// Send the email here:
-		// craft()->courier_emails->sendBlueprintEmail($blueprint, $renderVariables);
-		$models = Courier::getInstance()
-			->emails
-			->sendBlueprintEmail(
-				$blueprint,
-				$renderVariables
-			);
+		$courierEmailJob = new SendCourierEmailJob();
+		$courierEmailJob->renderVariables = $renderVariables;
+		$courierEmailJob->blueprintId = $blueprint->id;
+		$courierEmailJob->blueprintName = $blueprint->name;
+
+		// Send email job
+		Craft::$app->queue->push($courierEmailJob);
 
 		return;
-
-
 
 		/*
 		// Prep render variables
