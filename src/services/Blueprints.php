@@ -146,6 +146,18 @@ class Blueprints extends Component
 		return $models[0];
 	}
 
+	public function deleteBlueprintById($id)
+	{
+    $record = Blueprint::findOne($id);
+    $result = false;
+
+    if ($record) {
+      $result = $record->delete();
+    }
+
+    return $result;
+	}
+
 	public function checkEventConditions(Event $event, BlueprintModel $blueprint)
 	{
 		// var_dump($event->sender);

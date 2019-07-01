@@ -256,6 +256,30 @@ class BlueprintsController extends Controller
       return $this->renderTemplate('courier/_blueprint', $variables);
     }
 
+    public function actionDelete()
+    {
+      $this->requirePostRequest();
+      $request = Craft::$app->getRequest();
+      $id = $request->getRequiredBodyParam('id');
+
+      $result = Courier::getInstance()
+        ->blueprints
+        ->deleteBlueprintById($id);
+
+      return $this->asJson([
+        'success' => $result
+      ]);
+
+      // $this->requirePostRequest();
+      //     $this->requireAjaxRequest();
+
+      //     $id = craft()->request->getRequiredPost('id');
+
+      // $success = craft()->courier_blueprints->deleteBlueprintById($id);
+
+      // return $this->returnJson(['success' => $result]);
+    }
+
     /**
      * Shows the asset volume list.
      *
