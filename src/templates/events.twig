@@ -1,9 +1,9 @@
 {% extends "courier/_layout" %}
 
 {% set tabs = {
-	blueprints: { label: 'Blueprints'|t, url: url('courier') },
-	deliveries: { label: 'Deliveries'|t, url: url('courier/deliveries') },
-	events:     { label: 'Events'|t, url: url('courier/events') }
+  blueprints: { label: 'Blueprints'|t, url: url('courier') },
+  deliveries: { label: 'Deliveries'|t, url: url('courier/deliveries') },
+  events:     { label: 'Events'|t, url: url('courier/events') }
 } %}
 
 {% set selectedTab = 'events' %}
@@ -11,55 +11,56 @@
 {% import "_includes/forms" as forms %}
 
 {% block actionButton %}
-	<div class="buttons">
-		<a class="btn submit add icon"
-			href="{{ url('courier/events/new') }}">{{ "New Event"|t }}</a>
-	</div>
+  <div class="buttons">
+  <a class="btn submit add icon"
+    href="{{ url('courier/events/new') }}">{{ "New Event"|t }}
+  </a>
+  </div>
 {% endblock %}
 
 {% block content %}
-	<h2>{{ 'Events'|t }}</h2>
+  <h2>{{ 'Events'|t }}</h2>
 
-	{% if events|length %}
-			<table class="data" id="events" style="width: 75%">
-				<thead>
-					<tr>
-						<th>{{ 'Event Class'|t }}</th>
-						<th>{{ 'Event Handle'|t }}</th>
-						<th>{{ 'Description'|t }}</th>
-						<th>{{ 'Enabled?'|t }}</th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					{% for event in events %}
-						<tr data-id="{{ event.id }}" data-uid="{{ event.uid }}" data-name="{{ event.eventClass }}" data-event-class="{{ event.eventClass }}" data-event-handle="{{ event.eventHandle }}">
-							<td data-title="Event Class">
-								<a href="{{ url('courier/events/' ~ event.id) }}">{{ event.eventClass }}</a>
-							</td>
-							<td data-title="Event Handle">
-								<a href="{{ url('courier/events/' ~ event.id) }}">{{ event.eventHandle }}</a>
-							</td>
-							<td data-title="Event Description">{{ event.description }}</td>
-							<td data-title="Event Enabled">{{ event.enabled ? 'Yes' : 'No' }}</td>
-							<td class="thin"><a class="delete icon" title="Delete" role="button"></a></td>
-						</tr>
-					{% endfor %}
-				</tbody>
-			</table>
-	{% endif %}
+  {% if events|length %}
+    <table class="data" id="events" style="width: 75%">
+      <thead>
+      <tr>
+        <th>{{ 'Event Class'|t }}</th>
+        <th>{{ 'Event Handle'|t }}</th>
+        <th>{{ 'Description'|t }}</th>
+        <th>{{ 'Enabled?'|t }}</th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for event in events %}
+        <tr data-id="{{ event.id }}" data-uid="{{ event.uid }}" data-name="{{ event.eventClass }}" data-event-class="{{ event.eventClass }}" data-event-handle="{{ event.eventHandle }}">
+        <td data-title="Event Class">
+          <a href="{{ url('courier/events/' ~ event.id) }}">{{ event.eventClass }}</a>
+        </td>
+        <td data-title="Event Handle">
+          <a href="{{ url('courier/events/' ~ event.id) }}">{{ event.eventHandle }}</a>
+        </td>
+        <td data-title="Event Description">{{ event.description }}</td>
+        <td data-title="Event Enabled">{{ event.enabled ? 'Yes' : 'No' }}</td>
+        <td class="thin"><a class="delete icon" title="Delete" role="button"></a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
 {% endblock %}
 
 {% includejs %}
-	var adminTable = new Craft.AdminTable({
-		tableSelector: '#events',
-		noObjectsSelector: '#no-events',
-		deleteAction: 'courier/events/delete',
-		onDeleteItem: function() {
-			{# if (adminTable.totalItems == 0) {
-				$('#has-deliveries').remove();
-				$('#no-deliveries').show().removeClass('hidden');
-			} #}
-		}
-	});
+  var adminTable = new Craft.AdminTable({
+    tableSelector: '#events',
+    noObjectsSelector: '#no-events',
+    deleteAction: 'courier/events/delete',
+    onDeleteItem: function() {
+    {# if (adminTable.totalItems == 0) {
+      $('#has-deliveries').remove();
+      $('#no-deliveries').show().removeClass('hidden');
+    } #}
+    }
+  });
 {% endincludejs %}

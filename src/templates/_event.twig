@@ -2,54 +2,54 @@
 {% import '_includes/forms' as forms %}
 
 {% set crumbs = [
-	{ label: 'Courier'|t, url: url('courier') },
-	{ label: 'Events'|t, url: url('courier/events') },
+  { label: 'Courier'|t, url: url('courier') },
+  { label: 'Events'|t, url: url('courier/events') },
 ] %}
 
 {% set fullPageForm = true %}
 
 {% block content %}
-	<input type="hidden" name="action" value="courier/events/save">
-	<input type="hidden" name="redirect" value="courier/events">
-	{{ getCsrfInput() }}
-	<input type="hidden" name="eventId" value="{{ event.id }}">
-	<div id="event" style="width: 50%">
-		{{ forms.textField({
-			label: 'Event Class'|t,
-			instructions: 'The class associated with the Event.'|t,
-			id: 'eventClass',
-			name: 'eventClass',
-			value: event.eventClass,
-			required: true,
-			autocomplete: false,
-			errors: event.getErrors('eventClass'),
-		}) }}
-		{{ forms.textField({
-			label: 'Event Handle'|t,
-			instructions: 'The handle associated with the Event.'|t,
-			id: 'eventHandle',
-			name: 'eventHandle',
-			required: true,
-			value: event.eventHandle,
-			autocomplete: false,
-			errors: event.getErrors('eventHandle'),
-		}) }}
-		{{ forms.textField({
-			label: 'Event Description'|t,
-			instructions: 'A small description of the event'|t,
-			id: 'eventDescription',
-			name: 'eventDescription',
-			value: event.description,
-			autocomplete: false,
-			errors: event.getErrors('description'),
-		}) }}
-		{{ forms.lightswitchField({
-			label: 'Enabled?'|t,
-			id: 'enabled',
-			name: 'enabled',
-			value: 1,
-			on: event.enabled,
-			errors: event.getErrors('enabled'),
-		}) }}
-	</div>
+  <input type="hidden" name="action" value="courier/events/save">
+  <input type="hidden" name="redirect" value="courier/events">
+  <input type="hidden" name="eventId" value="{{ event.id }}">
+  {{ getCsrfInput() }}
+  <div id="event" style="width: 50%">
+    {{ forms.textField({
+      label: 'Event Class'|t,
+      instructions: 'The class associated with the Event.'|t,
+      id: 'eventClass',
+      name: 'eventClass',
+      value: event.eventClass,
+      required: true,
+      autocomplete: false,
+      errors: event.getErrors('eventClass'),
+    }) }}
+    {{ forms.textField({
+      label: 'Event Handle'|t,
+      instructions: 'The handle associated with the Event.'|t,
+      id: 'eventHandle',
+      name: 'eventHandle',
+      required: true,
+      value: event.eventHandle,
+      autocomplete: false,
+      errors: event.getErrors('eventHandle'),
+    }) }}
+    {{ forms.textField({
+      label: 'Event Description'|t,
+      instructions: 'A small description of the event'|t,
+      id: 'eventDescription',
+      name: 'eventDescription',
+      value: event.description,
+      autocomplete: false,
+      errors: event.getErrors('description'),
+    }) }}
+    {{ forms.lightswitchField({
+      label: 'Enabled?'|t,
+      id: 'enabled',
+      name: 'enabled',
+      value: 1,
+      on: event.enabled,
+      errors: event.getErrors('enabled'),
+    }) }}
+  </div>
 {% endblock %}

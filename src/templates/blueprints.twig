@@ -1,77 +1,78 @@
 {% extends "courier/_layout" %}
 
 {% set tabs = {
-	blueprints: { label: 'Blueprints'|t, url: url('courier') },
-	deliveries: { label: 'Deliveries'|t, url: url('courier/deliveries') },
-	events:     { label: 'Events'|t, url: url('courier/events') }
+  blueprints: { label: 'Blueprints'|t, url: url('courier') },
+  deliveries: { label: 'Deliveries'|t, url: url('courier/deliveries') },
+  events:     { label: 'Events'|t, url: url('courier/events') }
 } %}
 
 {% set selectedTab = 'blueprints' %}
 
 {% set extraPageHeaderHtml %}
-	<div class="buttons">
-		<a href="{{ url('courier/blueprints/new') }}" class="btn submit add icon">{{ "New Blueprint"|t }}</a>
-	</div>
+  <div class="buttons">
+    <a href="{{ url('courier/blueprints/new') }}" class="btn submit add icon">{{ "New Blueprint"|t }}</a>
+  </div>
 {% endset %}
 {% block content %}
-	<h2>{{ 'Blueprints'|t }}</h2>
-	<p id="no-blueprints"{% if blueprints|length %} class="hidden"{% endif %}>
-		{{ 'No blueprints found. Why not <a href="{url}">create one</a>?'|t({
-			url: url('courier/blueprints/new')
-		})|raw }}
-	</p>
-	{% if blueprints|length %}
-		<div id="has-blueprints">
-			<table class="data fullwidth" id="blueprints">
-				<thead>
-					<tr>
-						<th>{{ 'Name'|t }}</th>
-						<th>{{ 'To Email'|t }}</th>
-						<th>{{ 'Email Subject'|t }}</th>
-						<th>{{ 'Event Triggers'|t }}</th>
-						<th>{{ 'HTML Email Template Path'|t }}</th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					{% for blueprint in blueprints %}
-						<tr data-id="{{ blueprint.id }}" data-name="{{ blueprint.name }}">
-							<th scope="row" data-title="Name">
-								<span class="status {{ blueprint.enabled ? 'green' : 'red' }}"></span>
-								<a href="{{ url('courier/blueprints/' ~ blueprint.id) }}">{{ blueprint.name }}</a>
-							</th>
-							<td data-title="Email Recipient">{{ blueprint.toEmail }}</td>
-							<td data-title="Email Subject">{{ blueprint.emailSubject }}</td>
-							<td data-title="Event Triggers">
-								{% for eventTriggerId in blueprint.eventTriggersJsonArray %}
-									{% set event = eventLookup[eventTriggerId] ?? null %}
-									{% if event %}
-										{{ event.eventClass }} => {{ event.eventHandle }}<br />
-									{% endif %}
-								{% endfor %}
-							</td>
-							<td data-title="HTML Email Template Path">{{ blueprint.htmlEmailTemplatePath }}</td>
-							<td class="thin"><a class="delete icon" title="Delete" role="button"></a></td>
-						</tr>
-					{% endfor %}
-				</tbody>
-			</table>
-		</div>
-	{% endif %}
-	<div class="buttons">
-		<a href="{{ url('courier/blueprints/new') }}" class="btn submit add icon">{{ 'New Blueprint'|t }}</a>
-	</div>
+  <h2>{{ 'Blueprints'|t }}</h2>
+  <p id="no-blueprints"{% if blueprints|length %} class="hidden"{% endif %}>
+    {{ 'No blueprints found. Why not <a href="{url}">create one</a>?'|t({
+      url: url('courier/blueprints/new')
+    })|raw }}
+  </p>
+  {% if blueprints|length %}
+    <div id="has-blueprints">
+      <table class="data fullwidth" id="blueprints">
+        <thead>
+          <tr>
+          <th>{{ 'Name'|t }}</th>
+          <th>{{ 'To Email'|t }}</th>
+          <th>{{ 'Email Subject'|t }}</th>
+          <th>{{ 'Event Triggers'|t }}</th>
+          <th>{{ 'HTML Email Template Path'|t }}</th>
+          <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for blueprint in blueprints %}
+          <tr data-id="{{ blueprint.id }}" data-name="{{ blueprint.name }}">
+            <th scope="row" data-title="Name">
+              <span class="status {{ blueprint.enabled ? 'green' : 'red' }}"></span>
+              <a href="{{ url('courier/blueprints/' ~ blueprint.id) }}">{{ blueprint.name }}</a>
+            </th>
+            <td data-title="Email Recipient">{{ blueprint.toEmail }}</td>
+            <td data-title="Email Subject">{{ blueprint.emailSubject }}</td>
+            <td data-title="Event Triggers">
+            {% for eventTriggerId in blueprint.eventTriggersJsonArray %}
+              {% set event = eventLookup[eventTriggerId] ?? null %}
+              {% if event %}
+                {{ event.eventClass }} => {{ event.eventHandle }}<br />
+              {% endif %}
+            {% endfor %}
+            </td>
+            <td data-title="HTML Email Template Path">{{ blueprint.htmlEmailTemplatePath }}</td>
+            <td class="thin"><a class="delete icon" title="Delete" role="button"></a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+  <div class="buttons">
+    <a href="{{ url('courier/blueprints/new') }}" class="btn submit add icon">{{ 'New Blueprint'|t }}</a>
+  </div>
 {% endblock %}
+
 {% includejs %}
-	var adminTable = new Craft.AdminTable({
-		tableSelector: '#blueprints',
-		noObjectsSelector: '#no-blueprints',
-		deleteAction: 'courier/blueprints/delete',
-		onDeleteItem: function() {
-			if (adminTable.totalItems == 0) {
-				$('#has-blueprints').remove();
-				$('#no-blueprints').show().removeClass('hidden');
-			}
-		}
-	});
+  var adminTable = new Craft.AdminTable({
+    tableSelector: '#blueprints',
+    noObjectsSelector: '#no-blueprints',
+    deleteAction: 'courier/blueprints/delete',
+    onDeleteItem: function() {
+      if (adminTable.totalItems == 0) {
+        $('#has-blueprints').remove();
+        $('#no-blueprints').show().removeClass('hidden');
+      }
+    }
+  });
 {% endincludejs %}
