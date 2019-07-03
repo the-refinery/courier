@@ -8,6 +8,7 @@ use yii\base\Event;
 use refinery\courier\records\Event as CourierEventRecord;
 use refinery\courier\models\Event as CourierEventModel;
 use refinery\courier\services\ModelPopulator;
+use yii\log\Logger;
 
 class Events extends Component
 {
@@ -30,7 +31,25 @@ class Events extends Component
     $record->description  = $eventModel->description;
     $record->enabled      = $eventModel->enabled;
 
-    $record->save(false);
+    $transaction = Craft::$app->db->beginTransaction();
+
+    try {
+      // Ensure that the event class exists. If it doesn't, this will throw
+      // an exception. It should not be saved unless the class can be found.
+      new $record->eventClass;
+
+      $record->save(false);
+      $transaction->commit();
+    } catch(\Throwable $e) {
+      $transaction->rollBack();
+      Courier::log(
+        "\nThere was a problem saving Event:\n{$e->getMessage()}\n{$e->getTraceAsString()}",
+        Logger::LEVEL_ERROR
+      );
+
+      throw $e;
+    }
+
     $eventModel->id = $record->id;
 
     return true;
@@ -43,8 +62,19 @@ class Events extends Component
       $criteria = CourierEventRecord::find();
     }
 
-    $records = $criteria
-      ->all();
+    $records = [];
+
+    try {
+      $records = $criteria
+        ->all();
+    } catch(\Throwable $e) {
+      Courier::log(
+        "\nThere was a problem getting all Events:\n{$e->getMessage()}\n{$e->getTraceAsString()}",
+        Logger::LEVEL_ERROR
+      );
+
+      throw $e;
+    }
 
     $models = Courier::getInstance()
       ->modelPopulator
@@ -58,7 +88,17 @@ class Events extends Component
 
   public function getEventById($id)
   {
-    $record = CourierEventRecord::findOne($id);
+    $record = null;
+    try {
+      $record = CourierEventRecord::findOne($id);
+    } catch(\Throwable $e) {
+      Courier::log(
+        "\nThere was a problem getting Event by id={$id}:\n{$e->getMessage()}\n{$e->getTraceAsString()}",
+        Logger::LEVEL_ERROR
+      );
+
+      throw $e;
+    }
 
     if (!$record) {
       return null;
@@ -76,58 +116,82 @@ class Events extends Component
 
   public function deleteEventById($id)
   {
-    $record = CourierEventRecord::findOne($id);
-    $result = false;
+    $transaction = Craft::$app->db->beginTransaction();
 
-    if ($record) {
-      $result = $record->delete();
+    try {
+      $record = CourierEventRecord::findOne($id);
+      $result = false;
+
+      if ($record) {
+        $result = $record->delete();
+        $transaction->commit();
+      } else {
+        return false;
+      }
+    } catch(\Throwable $e) {
+      $transaction->rollBack();
+      Courier::log(
+        "\nThere was a problem deleting Event id={$id}:\n{$e->getMessage()}\n{$e->getTraceAsString()}",
+        Logger::LEVEL_ERROR
+      );
+
+      throw $e;
     }
 
-    return $result;
+    return true;
   }
 
 public function setupEventListeners()
 {
-  $enabledBlueprints = Courier::getInstance()
-    ->blueprints
-    ->getEnabledBlueprints();
+  try {
+    $enabledBlueprints = Courier::getInstance()
+      ->blueprints
+      ->getEnabledBlueprints();
 
-  $blueprintEventMap = Courier::getInstance()
-    ->events
-    ->eventIdMappingFromBlueprints($enabledBlueprints);
+    $blueprintEventMap = Courier::getInstance()
+      ->events
+      ->eventIdMappingFromBlueprints($enabledBlueprints);
 
-  foreach($enabledBlueprints as $blueprint) {
-    if(!$blueprint->eventTriggers) {
-      continue;
-    }
+    foreach($enabledBlueprints as $blueprint) {
+      if(!$blueprint->eventTriggers) {
+        continue;
+      }
 
-    foreach($blueprint->eventTriggersJsonArray() as $eventTriggerId) {
-      $event = $blueprintEventMap[$eventTriggerId] ?? null;
+      foreach($blueprint->eventTriggersJsonArray() as $eventTriggerId) {
+        $event = $blueprintEventMap[$eventTriggerId] ?? null;
 
-      if($event && $event->enabled) {
-        $className = $event->eventClass;
-        $obj = new $className;
+        if($event && $event->enabled) {
+          $className = $event->eventClass;
+          $obj = new $className;
 
-        // Use reflection to attempt to get handle value
-        $class_reflex = new \ReflectionClass($obj);
-        $class_constants = $class_reflex->getConstants();
-        if (array_key_exists($event->eventHandle, $class_constants)) {
-          $constant_value = $class_constants[$event->eventHandle];
-        } else {
-          $constant_value = $event->eventHandle;
-        }
-
-        Event::on(
-          get_class($obj),
-          $constant_value,
-          function(Event $event) use ($blueprint) {
-            Courier::getInstance()
-            ->blueprints
-            ->checkEventConditions($event, $blueprint);
+          // Use reflection to attempt to get handle value
+          $class_reflex = new \ReflectionClass($obj);
+          $class_constants = $class_reflex->getConstants();
+          if (array_key_exists($event->eventHandle, $class_constants)) {
+            $constant_value = $class_constants[$event->eventHandle];
+          } else {
+            $constant_value = $event->eventHandle;
           }
-        );
+
+          Event::on(
+            get_class($obj),
+            $constant_value,
+            function(Event $event) use ($blueprint) {
+              Courier::getInstance()
+              ->blueprints
+              ->checkEventConditions($event, $blueprint);
+            }
+          );
+        }
       }
     }
+  } catch(\Throwable $e) {
+    Courier::log(
+      "\nThere was a problem setting up Event Listeners:\n{$e->getMessage()}\n{$e->getTraceAsString()}",
+      Logger::LEVEL_ERROR
+    );
+
+    throw $e;
   }
 
   // On the event that an email is sent, create a successful delivery record
@@ -169,13 +233,24 @@ public function setupEventListeners()
 
     $blueprintEventIds = array_unique($blueprintEventIds);
 
-    // Get all Courier events by the IDs above
-    $events = Courier::getInstance()
-      ->events
-      ->getAllEvents(
-        CourierEventRecord::find()
-          ->where(['id' => $blueprintEventIds])
+    $events = [];
+
+    try {
+      // Get all Courier events by the IDs above
+      $events = Courier::getInstance()
+        ->events
+        ->getAllEvents(
+          CourierEventRecord::find()
+            ->where(['id' => $blueprintEventIds])
+        );
+    } catch(\Throwable $e) {
+      Courier::log(
+        "\nThere was a problem getting Blueprints to set up mapping:\n{$e->getMessage()}\n{$e->getTraceAsString()}",
+        Logger::LEVEL_ERROR
       );
+
+      throw $e;
+    }
 
     return $events;
   }
