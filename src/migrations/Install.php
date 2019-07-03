@@ -3,6 +3,7 @@
 namespace refinery\courier\migrations;
 
 use craft\db\Migration;
+use refinery\courier\records\Event as CourierEventRecord;
 
 class Install extends Migration
 {
@@ -139,6 +140,21 @@ class Install extends Migration
         ]
       );
     }
+
+    // Create some out-of-the-box events to use.
+    $entryBeforeSaveEvent = new CourierEventRecord();
+    $entryBeforeSaveEvent->eventHandle  = 'EVENT_BEFORE_SAVE';
+    $entryBeforeSaveEvent->eventClass   = '\craft\elements\Entry';
+    $entryBeforeSaveEvent->description  = 'This event fires before an entry is saved.';
+    $entryBeforeSaveEvent->enabled      = true;
+    $entryBeforeSaveEvent->save(false);
+
+    $entryAfterSaveEvent = new CourierEventRecord();
+    $entryAfterSaveEvent->eventHandle  = 'EVENT_AFTER_SAVE';
+    $entryAfterSaveEvent->eventClass   = '\craft\elements\Entry';
+    $entryAfterSaveEvent->description  = 'This event fires after an entry is saved.';
+    $entryAfterSaveEvent->enabled      = true;
+    $entryAfterSaveEvent->save(false);
   }
 
   public function dropTables()
