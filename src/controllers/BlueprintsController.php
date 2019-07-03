@@ -71,22 +71,22 @@ class BlueprintsController extends Controller
     $blueprint = new BlueprintModel();
     $request = Craft::$app->getRequest();
 
-    $blueprint->id 						= $request->getParam('blueprintId', $blueprint->id);
-    $blueprint->name 					= $request->getParam('name', $blueprint->name);
-    $blueprint->description 	= $request->getParam('description', $blueprint->description);
-    $blueprint->enabled 			= $request->getParam('enabled', $blueprint->enabled);
-    $blueprint->emailSubject 	= $request->getParam('emailSubject', $blueprint->emailSubject);
-    $blueprint->toEmail 			= $request->getParam('toEmail', $blueprint->toEmail);
-    $blueprint->toName 				= $request->getParam('toName', $blueprint->toName);
-    $blueprint->fromEmail 		= $request->getParam('fromEmail', $blueprint->fromEmail);
-    $blueprint->fromName 			= $request->getParam('fromName', $blueprint->fromName);
-    $blueprint->replyToEmail	= $request->getParam('replyToEmail', $blueprint->replyToEmail);
-    $blueprint->ccEmail 			= $request->getParam('ccEmail', $blueprint->ccEmail);
-    $blueprint->bccEmail 			= $request->getParam('bccEmail', $blueprint->bccEmail);
+    $blueprint->id            = $request->getParam('blueprintId', $blueprint->id);
+    $blueprint->name          = $request->getParam('name', $blueprint->name);
+    $blueprint->description   = $request->getParam('description', $blueprint->description);
+    $blueprint->enabled       = $request->getParam('enabled', $blueprint->enabled);
+    $blueprint->emailSubject  = $request->getParam('emailSubject', $blueprint->emailSubject);
+    $blueprint->toEmail       = $request->getParam('toEmail', $blueprint->toEmail);
+    $blueprint->toName        = $request->getParam('toName', $blueprint->toName);
+    $blueprint->fromEmail     = $request->getParam('fromEmail', $blueprint->fromEmail);
+    $blueprint->fromName      = $request->getParam('fromName', $blueprint->fromName);
+    $blueprint->replyToEmail  = $request->getParam('replyToEmail', $blueprint->replyToEmail);
+    $blueprint->ccEmail       = $request->getParam('ccEmail', $blueprint->ccEmail);
+    $blueprint->bccEmail      = $request->getParam('bccEmail', $blueprint->bccEmail);
     $blueprint->eventTriggers = $request->getParam('eventTriggers', $blueprint->eventTriggers);
-    $blueprint->htmlEmailTemplatePath 	= $request->getParam('htmlEmailTemplatePath', $blueprint->htmlEmailTemplatePath);
-    $blueprint->textEmailTemplatePath 	= $request->getParam('textEmailTemplatePath', $blueprint->textEmailTemplatePath);
-    $blueprint->eventTriggerConditions 	= $request->getParam('eventTriggerConditions', $blueprint->eventTriggerConditions);
+    $blueprint->htmlEmailTemplatePath   = $request->getParam('htmlEmailTemplatePath', $blueprint->htmlEmailTemplatePath);
+    $blueprint->textEmailTemplatePath   = $request->getParam('textEmailTemplatePath', $blueprint->textEmailTemplatePath);
+    $blueprint->eventTriggerConditions  = $request->getParam('eventTriggerConditions', $blueprint->eventTriggerConditions);
 
     if (!Courier::getInstance()->blueprints->saveBlueprint($blueprint)) {
       Craft::$app
