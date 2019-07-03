@@ -33,9 +33,9 @@ class Blueprints extends Component
           $records,
           \refinery\courier\models\Blueprint::class
         );
-    } catch(\Exception $e) {
+    } catch(\Throwable $e) {
       Courier::log(
-        "There was a problem obtaining all Blueprints:\n\n{$e->getMessage()}",
+        "\nThere was a problem obtaining all Blueprints:\n{$e->getMessage()}\n{$e->getTraceAsString()}",
         Logger::LEVEL_ERROR
       );
 
@@ -56,9 +56,9 @@ class Blueprints extends Component
         );
 
       return $this->getAllBlueprints($criteria);
-    } catch(\Exception $e) {
+    } catch(\Throwable $e) {
       Courier::log(
-        "There was a problem obtaining enabled Blueprints:\n\n{$e->getMessage()}",
+        "\nThere was a problem obtaining enabled Blueprints:\n{$e->getMessage()}\n{$e->getTraceAsString()}",
         Logger::LEVEL_ERROR
       );
 
@@ -102,10 +102,10 @@ class Blueprints extends Component
     try {
       $record->save(false);
       $transaction->commit();
-    } catch(\Exception $e) {
+    } catch(\Throwable $e) {
       $transaction->rollBack();
       Courier::log(
-        "There was a problem saving Blueprint:\n\n{$e->getMessage()}",
+        "\nThere was a problem saving Blueprint:\n{$e->getMessage()}\n{$e->getTraceAsString()}",
         Logger::LEVEL_ERROR
       );
 
@@ -123,9 +123,9 @@ class Blueprints extends Component
 
     try {
       $record = Blueprint::findOne($id);
-    } catch(\Exception $e) {
+    } catch(\Throwable $e) {
       Courier::log(
-        "There was a problem getting Blueprint by id={$id}:\n\n{$e->getMessage()}",
+        "\nThere was a problem getting Blueprint by id={$id}:\n{$e->getMessage()}\n{$e->getTraceAsString()}",
         Logger::LEVEL_ERROR
       );
 
@@ -159,10 +159,10 @@ class Blueprints extends Component
       } else {
         throw new Exception("Blueprint with id={$id} not found to delete.");
       }
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
       $transaction->rollBack();
       Courier::log(
-        "There was a problem deleting Blueprint={$id}:\n\n{$e->getMessage()}",
+        "\nThere was a problem deleting Blueprint={$id}:\n{$e->getMessage()}\n{$e->getTraceAsString()}",
         Logger::LEVEL_ERROR
       );
 
@@ -190,9 +190,9 @@ class Blueprints extends Component
       $eventTriggerConditions = \Craft::$app
       ->view
       ->renderString($blueprint->eventTriggerConditions, $renderVariables);
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
       Courier::log(
-        "There was a problem rendering eventTriggerConditions for Blueprint id={$blueprint->id}:\n\n{$e->getMessage()}",
+        "\nThere was a problem rendering eventTriggerConditions for Blueprint id={$blueprint->id}:\n{$e->getMessage()}\n{$e->getTraceAsString()}",
         Logger::LEVEL_ERROR
       );
 
@@ -215,9 +215,9 @@ class Blueprints extends Component
     // Send email job
     try {
       Craft::$app->queue->push($courierEmailJob);
-    } catch(\Exception $e) {
+    } catch(\Throwable $e) {
       Courier::log(
-        "There was a problem adding a Courier email job to the queue:\n\n{$e->getMessage()}",
+        "\nThere was a problem adding a Courier email job to the queue:\n{$e->getMessage()}\n{$e->getTraceAsString()}",
         Logger::LEVEL_ERROR
       );
 
