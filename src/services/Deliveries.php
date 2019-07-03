@@ -1,12 +1,4 @@
 <?php
-/**
- * Courier plugin for Craft CMS 3.x
- *
- * This is a CraftCMS 3 fork of the original Courier plugin. The original project can be found here: https://github.com/therefinerynz/courier
- *
- * @link      https://the-refinery.io
- * @copyright Copyright (c) 2019 The Refinery
- */
 
 namespace refinery\courier\services;
 
@@ -20,39 +12,19 @@ use refinery\courier\models\Delivery as DeliveryModel;
 use refinery\courier\services\ModelPopulator;
 use craft\db\Query;
 
-/**
- * @author    The Refinery
- * @package   Courier
- * @since     0.1.0
- */
-
 class Deliveries extends Component
 {
-	// Public Methods
-	// =========================================================================
-
-	/**
-	 * @param array|\CDbCriteria $criteria
-	 *
-	 * @return Delivery[]
-	 */
 	public function getAllDeliveries($criteria = null)
 	{
-    // CONVERSION: $records = Courier_DeliveryRecord::model()
-		// 	->with('blueprint')
-		// 	->findAll($criteria);
 		if(is_null($criteria))
 		{
 			$criteria = Delivery::find();
 		}
 
-		// $records = Delivery::find($criteria)
 		$records = $criteria
 			->with('blueprint')
 			->all();
 
-		// CONVERSION: $models = Courier_DeliveryModel::populateModels($records);
-		// $models = $this->populateModels($records);
 		$models = Courier::getInstance()
 			->modelPopulator
 			->populateModels(
@@ -61,73 +33,19 @@ class Deliveries extends Component
 			);
 
 		return $models;
-		// return $records;
 	}
-/*
-    private function populateModels(array $records): array
-    {
-        $models = [];
 
-        if (!empty($records)) {
-					foreach($records as $record) {
-						$model = new DeliveryModel();
-						$modelAttributes = array_keys($model->getAttributes());
-						// var_dump($modelAttributes);
-						// die();
-
-						$recordAttributes = $record->getAttributes($modelAttributes);
-						$model->setAttributes($recordAttributes);
-            $models[] = $model;
-					}
-            // foreach ($records as $record) {
-						// 		$recordAttributes = $record->getAttributes();
-            //     // $model = new DeliveryModel();
-						// 		// var_dump($model->getAttributes());
-						// 		// die();
-            //     $model = new DeliveryModel();
-            //     $model->setAttributes($recordAttributes);
-
-            //     $models[] = $model;
-						// }
-        }
-
-        return $models;
-		}
-*/
-
-	/**
-	 * Create and save a delivery to record and keep track of a blueprint email that was sent
-	 *
-	 * @param  \CEvent $event
-	 *
-	 * @return void
-	 */
 	public function createDelivery(Event $event)
 	{
-		// $params = $event->params;
 		$recipients = '';
 		$blueprint = $event->blueprint;
-		// var_dump($blueprint->toEmail);
-		// die();
-
-		// Do we have an Email model?
-		// if (isset($params['email'])) {
-		// 	$toEmail = $params['email']['toEmail'];
-		// 	$recipients = is_array($toEmail) ? $this->_convertEmailArrayToString($toEmail) : $toEmail;
-		// }
 
 		if(isset($blueprint->toEmail)) {
 			$toEmail = $blueprint->toEmail;
-			$recipients = is_array($toEmail) ? $this->_convertEmailArrayToString($toEmail) : $toEmail;
+      $recipients = is_array($toEmail) ?
+        $this->_convertEmailArrayToString($toEmail) :
+        $toEmail;
 		}
-
-		/*
-		$delivery = new Courier_DeliveryModel();
-		$delivery->blueprintId 	 = $params['blueprint']->id;
-		$delivery->toEmail 		 = $recipients;
-		$delivery->success 		 = isset($params['success']) ? $params['success'] : false;
-		$delivery->errorMessages = isset($params['error']) ? $params['error'] : '';
-		*/
 
 		$delivery = new DeliveryModel();
 		$delivery->blueprintId = $blueprint->id;
@@ -141,9 +59,6 @@ class Deliveries extends Component
 		$this->enforceDeliveriesLimit();
 	}
 
-	/**
-	 * @param int $id
-	 */
 	public function deleteDeliveryById($id)
 	{
     $record = Delivery::findOne($id);
@@ -164,23 +79,14 @@ class Deliveries extends Component
 			$result = Delivery::deleteAll();
     } catch(\Exception $e) {
 			// Log here
-
 		}
 
 		return $result;
 	}
 
-	/**
-	 * Ensure and enforce that we never have more Courier_DeliveryModel Records saved to the DB than Courier's set delivery record limit
-	 *
-	 * @param int $deliveriesLimit
-	 *
-	 * @return void
-	 */
 	public function enforceDeliveriesLimit($deliveriesLimit = null)
 	{
 		if (!$deliveriesLimit) {
-			// $deliveriesLimit = craft()->plugins->getPlugin('courier')->getSettings()->deliveriesRecordLimit;
 			$deliveriesLimit = Courier::getInstance()
 				->settings
 				->deliveriesRecordLimit;
@@ -190,8 +96,6 @@ class Deliveries extends Component
 			->select('count(*)')
 			->from(Delivery::tableName())
 			->scalar();
-
-		// $deliveriesCount = count(Courier_DeliveryRecord::model()->findAll());
 
 		// Proceed only if limit was reached
 		if (!($deliveriesCount > $deliveriesLimit)) {
@@ -207,29 +111,19 @@ class Deliveries extends Component
 
 		$deleteLimit = $deliveriesCount - $deliveriesLimit;
 
-		// There is very little risk of the tableName undergoing an SQL injection attack,
-		// so string injection for the table name should be sufficient.
+    // There is very little risk of the tableName undergoing an SQL injection
+    // attack, so string injection for the table name should be sufficient.
 		$dbCommand = Craft::$app
 			->getDb()
 			->createCommand("DELETE FROM {$deliveriesTable} ORDER BY dateCreated ASC limit :deleteLimit");
 
 		$dbCommand->bindParam(':deleteLimit', $deleteLimit);
 		$dbCommand->execute();
-
 	}
 
-	// Private Methods
-	// =========================================================================
-
-	/**
-	 * @param  Courier_DeliveryModel $deliveryModel
-	 *
-	 * @return int|null $deliveryId
-	 */
 	private function _saveDelivery(DeliveryModel $deliveryModel)
 	{
 		if (!$deliveryModel->validate()) {
-			// Validation errors to string
 			$errors = array_column($deliveryModel->getErrors(), 0);
 			$errors = implode(' ', $errors);
 			// Log here
@@ -272,7 +166,8 @@ class Deliveries extends Component
 		$i = 0;
 
 		foreach ($emails as $key => $val) {
-			// Choose correct format depending on whether key is a string or sequentially indexed
+      // Choose correct format depending on whether key is a string or
+      // sequentially indexed
 			$withName = is_string($key);
 			$emailsString .= $withName ?  $val . ' <' . $key . '>' : $val;
 			if ($i < count($emails) - 1 && $withName) {

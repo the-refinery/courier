@@ -1,29 +1,14 @@
 <?php
-/**
- * Courier plugin for Craft CMS 3.x
- *
- * This is a CraftCMS 3 fork of the original Courier plugin. The original project can be found here: https://github.com/therefinerynz/courier
- *
- * @link      https://the-refinery.io
- * @copyright Copyright (c) 2019 The Refinery
- */
 
 namespace refinery\courier\services;
 
 use refinery\courier\Courier;
-
 use Craft;
 use craft\base\Component;
 use refinery\courier\models\Blueprint as BlueprintModel;
 use refinery\courier\events\BlueprintEmailEvent;
 use craft\mail\Message;
 use yii\base\Event;
-
-/**
- * @author    The Refinery
- * @package   Courier
- * @since     0.1.0
- */
 
 class Emails extends Component
 {
@@ -47,12 +32,9 @@ class Emails extends Component
 
 		// Now try to send the email
 		try {
-			// $success = craft()->email->sendEmail($email);
-
 			$success = Craft::$app
 				->mailer
 				->send($email);
-				// ->send($message);
 
 			$resultEventParams['success'] = $success;
 		} catch (\Exception $e) {
@@ -82,13 +64,6 @@ class Emails extends Component
 			// CourierPlugin::log($message, LogLevel::Info);
 
 			// Fire a new onBlueprintEmailSentEvent
-
-			/*
-			$event = new Event($this, $resultEventParams);
-			$this->onAfterBlueprintEmailSent($event);
-			*/
-
-			// $event = new Event();
 			$event = new BlueprintEmailEvent([
 				'blueprint' => $blueprint,
 				'renderVariables' => $renderVariables,
@@ -96,23 +71,6 @@ class Emails extends Component
 			]);
 
 			$this->onAfterBlueprintEmailSent($event);
-
-
-			// 83         $event = new RegisterFeedMeDataTypesEvent([
-			// 	84             'dataTypes' => [
-			// 	85                 Atom::class,
-			// 	86                 Csv::class,
-			// 	87                 GoogleSheet::class,
-			// 	88                 Json::class,
-			// 	89                 Rss::class,
-			// 	90                 Xml::class,
-			// 	91             ],
-			// 	92         ]);
-			// 	93
-			// 	94         $this->trigger(self::EVENT_REGISTER_FEED_ME_DATA_TYPES, $event);
-
-
-
 		} else {
 			// Log here
 			// $error = Craft::t("Unknown error occurred when attempting to send email for “{blueprint}”.\r\nCheck your Craft log for more details.", [
@@ -121,9 +79,7 @@ class Emails extends Component
 			// CourierPlugin::log($error, LogLevel::Error);
 			// $resultEventParams['error'] = $error;
 
-			// // Fire a new onBlueprintEmailFailedEvent
-			// $event = new Event($this, $resultEventParams);
-			// $this->onAfterBlueprintEmailFailed($event);
+			// Fire a new onBlueprintEmailFailedEvent
 			$error = "Unknown error occurred when attempting to send email for '{$blueprint->name}'.\r\nCheck your Craft log for more details.";
 			$event = new BlueprintEmailEvent([
 				'blueprint' => $blueprint,
@@ -138,20 +94,8 @@ class Emails extends Component
 		return true;
 	}
 
-	/**
-	 * Fire the event "onAfterBlueprintEmailSent"
-	 *
-	 * @param Event $event
-	 *
-	 * @return void
-	 */
 	public function onAfterBlueprintEmailSent(Event $event)
 	{
-			// 152         $this->trigger(self::EVENT_BEFORE_PUSH, $event);
-		// $this->raiseEvent('onAfterBlueprintEmailSent', $event);
-
-		// const EVENT_AFTER_BLUEPRINT_EMAIL_SENT = 'afterBlueprintEmailSent';
-		// const EVENT_AFTER_BLUEPRINT_EMAIL_FAILED = 'afterBlueprintEmailFailed';
 		$this->trigger(self::EVENT_AFTER_BLUEPRINT_EMAIL_SENT, $event);
 	}
 
@@ -160,56 +104,45 @@ class Emails extends Component
 		$this->trigger(self::EVENT_AFTER_BLUEPRINT_EMAIL_FAILED, $event);
 	}
 
-	// Private Methods
-	// =========================================================================
-
-	/**
-	 * @param Blueprint $blueprint
-	 * @param array $renderVariables
-	 *
-	 * @return Email|null
-	 */
 	private function _createBlueprintEmail(BlueprintModel $blueprint, array $renderVariables)
 	{
 		$resultEventParams = compact('blueprint');
 
 		// Try to render the blueprint templates and settings
 		try {
-			$blueprint = $this->_renderBlueprintSettings($blueprint, $renderVariables);
+      $blueprint = $this
+        ->_renderBlueprintSettings(
+            $blueprint,
+            $renderVariables
+          );
 
 			// Blueprint model should only be available in the email body templates
 			$emailVariables = array_merge($renderVariables, compact('blueprint'));
 
-			$emailTemplates = $this->_renderEmailTemplates($blueprint, $emailVariables);
+      $emailTemplates = $this
+        ->_renderEmailTemplates(
+          $blueprint,
+          $emailVariables
+        );
 		} catch (Exception $e) {
-			$error = Craft::t("Could not create email for the blueprint named “{blueprint}”.\r\n{error}", [
-				'blueprint' => $blueprint->name,
-				'error' => $e->getMessage(),
-			]);
-			CourierPlugin::log($error, LogLevel::Error, true);
+      // Log here.
+			// $error = Craft::t("Could not create email for the blueprint named “{blueprint}”.\r\n{error}", [
+			// 	'blueprint' => $blueprint->name,
+			// 	'error' => $e->getMessage(),
+      // ]);
 
-			$resultEventParams['error'] = $error;
+			// CourierPlugin::log($error, LogLevel::Error, true);
 
-			// Fire a new onBlueprintEmailFailedEvent
-			$event = new Event($this, $resultEventParams);
-			$this->onAfterBlueprintEmailFailed($event);
+			// $resultEventParams['error'] = $error;
+
+			// // Fire a new onBlueprintEmailFailedEvent
+			// $event = new Event($this, $resultEventParams);
+			// $this->onAfterBlueprintEmailFailed($event);
 
 			return null;
 		}
 
-		// $email = new EmailModel();
 		$email = new Message();
-
-		// Set required fields on the email
-		/*
-		$email->toFirstName = $blueprint->toName;
-		$email->toEmail = $blueprint->toEmail;
-		$email->fromEmail = $blueprint->fromEmail;
-		$email->fromName = $blueprint->fromName;
-		$email->subject = $blueprint->emailSubject;
-		$email->htmlBody = $emailTemplates['HTML Email Template'];
-		*/
-
 		$email->setTo([$blueprint->toEmail => $blueprint->toName]);
 		$email->setFrom([$blueprint->fromEmail => $blueprint->fromName]);
 		$email->setSubject($blueprint->emailSubject);
@@ -217,13 +150,10 @@ class Emails extends Component
 
 		// Set optional fields on the email
 		if (!empty($blueprint->replyToEmail)) {
-			// $email->replyTo =$blueprint->replyToEmail;
 			$email->setReplyTo($blueprint->replyToEmail);
 		}
 
 		if (!empty($blueprint->ccEmail)) {
-			// var_dump($blueprint->ccEmail);
-			// die();
 			$email->setCc($blueprint->ccEmail);
 		}
 
@@ -239,29 +169,26 @@ class Emails extends Component
 		return $email;
 	}
 
-	/**
-	 * @param BlueprintModel $blueprint
-	 * @param array $renderVariables
-	 *
-	 * @return array|null $result
-	 */
 	private function _renderEmailTemplates(BlueprintModel $blueprint, array $renderVariables)
 	{
-		// $oldTemplateMode = craft()->templates->getTemplateMode();
 		$oldTemplateMode = \Craft::$app
 			->view
 			->getTemplateMode();
 
 		// Switch template modes to allow us to locate the template paths
-		// craft()->templates->setTemplateMode(TemplateMode::Site);
 		\Craft::$app
 			->view
 			->setTemplateMode(\craft\web\View::TEMPLATE_MODE_SITE);
 
-		$emailTemplates = ['HTML Email Template' => $blueprint->htmlEmailTemplatePath];
+		$emailTemplates = [
+      'HTML Email Template' => $blueprint->htmlEmailTemplatePath
+    ];
 
 		if ($blueprint->textEmailTemplatePath) {
-			$emailTemplates = array_merge($emailTemplates, ['Text Email Template' => $blueprint->textEmailTemplatePath]);
+			$emailTemplates = array_merge(
+        $emailTemplates,
+        ['Text Email Template' => $blueprint->textEmailTemplatePath]
+      );
 		}
 
 		foreach ($emailTemplates as $attributeHandle => $attributeValue) {
@@ -274,7 +201,6 @@ class Emails extends Component
 				// Try to render dynamic path
 				try {
 					$lastRenderedResult = $renderableString;
-					// $renderableString = craft()->templates->renderString($renderableString, $renderVariables);
 					$renderableString = \Craft::$app
 						->view
 						->renderString(
@@ -300,12 +226,10 @@ class Emails extends Component
 			$templatePath = $this->_stripTwigBrackets($renderableString);
 
 			// Try to resolve the rendered template path
-
 			$templateExists = \Craft::$app
 				->view
 				->doesTemplateExist($templatePath);
 
-			// if (!craft()->templates->doesTemplateExist($templatePath)) {
 			if (!$templateExists) {
 				// Log here
 				$error = "Email template does not exist at path {$templatePath} for blueprint {$blueprint->name}";
@@ -322,27 +246,18 @@ class Emails extends Component
 
 			do {
 				try {
-					$lastRenderedResult = $renderableTemplate;
-					// Render template that dynamic path points to
+          $lastRenderedResult = $renderableTemplate;
 
-					// $renderableTemplate = craft()->templates->render($templatePath, $renderVariables);
+					// Render template that dynamic path points to
 					$renderableTemplate = \Craft::$app
 						->view
 						->renderTemplate(
 							$templatePath,
 							$renderVariables
 						);
-					// $renderableTemplate = \Craft::$app
-					// 	->view
-					// 	->render(
-					// 		$templatePath,
-					// 		$renderVariables,
-					// 		// why
-					// 		// \Craft::$app->view->context
-					// 	);
 				}
-				// Template file parse error
 				catch (\Exception $e) {
+          // Template file parse error
 					// Log here
 					$errorMessage = $e->getMessage();
 					$error = "Template parse error encountered while parsing the {$attributeHandle} file located at path {$templatePath} for the blueprint named {$blueprint->name}:\r\n{$errorMessage}";
@@ -364,7 +279,6 @@ class Emails extends Component
 		}
 
 		// Return to the original template mode
-		// craft()->templates->setTemplateMode($oldTemplateMode);
 		\Craft::$app
 			->view
 			->setTemplateMode($oldTemplateMode);
@@ -372,14 +286,6 @@ class Emails extends Component
 		return $emailTemplates;
 	}
 
-	/**
-	 * Render a given Blueprint's fields with Twig
-	 *
-	 * @param BlueprintModel $blueprint
-	 * @param array $renderVariables
-	 *
-	 * @return BlueprintModel - Blueprint with its settings rendered
-	 */
 	private function _renderBlueprintSettings(BlueprintModel $blueprint, array $renderVariables)
 	{
 		$renderableSettings = [
@@ -407,10 +313,8 @@ class Emails extends Component
 			}
 			do {
 				try {
-					$lastRenderedResult = $renderableString;
 					// Render the string with Twig
-					// $renderableString = craft()->templates->renderString($renderableString, $renderVariables);
-
+					$lastRenderedResult = $renderableString;
 					$renderableString = \Craft::$app
 						->view
 						->renderString(
@@ -420,8 +324,8 @@ class Emails extends Component
 
 					$renderableString = $this->_stripEntities($renderableString);
 				}
-				// Template parse error
 				catch (\Exception $e) {
+          // Template parse error
 					// Log exception here.
 					// $errorMessage = $e->getMessage();
 					// $error = Craft::t("Template parse error encountered while parsing field “{attributeName}” for the blueprint named “{blueprint}”:\r\n{error}", [
@@ -441,13 +345,12 @@ class Emails extends Component
 			if (in_array($attributeHandle, $multipleItemFields)) {
 				$emails = str_replace(';', ',', $renderedString);
 				$emails = explode(',', $emails);
-				$emailsArr = [];
-				// foreach ($emails as $email) {
-				// 	$emailsArr[] = ['email' => trim($email)];
-				// }
+        $emailsArr = [];
+
 				foreach($emails as $email) {
 					array_push($emailsArr, $email);
-				}
+        }
+
 				$blueprint[$attributeHandle] = $emailsArr;
 			} else {
 				$blueprint[$attributeHandle] = $renderedString;
@@ -457,14 +360,6 @@ class Emails extends Component
 		return $blueprint;
 	}
 
-	/**
-	 * Convert camelCase string to Title Case
-	 * From https://gist.github.com/justjkk/1402061
-	 *
-	 * @param str
-	 *
-	 * @return str $result
-	 */
 	private function _camelCaseToTitle($camelStr)
 	{
 		$intermediate = preg_replace('/(?!^)([[:upper:]][[:lower:]]+)/', ' $0', $camelStr);
@@ -473,43 +368,20 @@ class Emails extends Component
 		return ucwords($titleStr);
 	}
 
-	/**
-	 * Strip HTML entities from string and trim
-	 * From http://php.net/manual/en/function.html-entity-decode.php#104617
-	 *
-	 * @param str $string
-	 *
-	 * @return str $result
-	 */
 	private function _stripEntities($string)
 	{
-		 return trim(preg_replace_callback("/(&#[0-9]+;)/", function($m) {
-			 return mb_convert_encoding($m[1], "UTF-8", "HTML-ENTITIES");
+		return trim(preg_replace_callback("/(&#[0-9]+;)/", function($m) {
+      return mb_convert_encoding($m[1], "UTF-8", "HTML-ENTITIES");
 		}, $string));
 	}
 
-	/**
-	 * Check for Twig tags within a template string
-	 *
-	 * @param str $template
-	 *
-	 * @return bool
-	 */
 	private function _hasTwigBrackets($template)
 	{
 		return preg_match('/\{{2}.*?\}{2}|\{\%.*?\%\}/', $template);
 	}
 
-	/**
-	 * Strip Twig tags from string (used in case of inability to render)
-	 *
-	 * @param str $template
-	 *
-	 * @return str
-	 */
 	private function _stripTwigBrackets($template)
 	{
 		return preg_replace('/\{{2}.*?\}{2}|\{\%.*?\%\}/', '', $template);
 	}
-
 }
