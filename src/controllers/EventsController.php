@@ -8,16 +8,9 @@ use yii\base\Exception;
 use yii\web\Response;
 use refinery\courier\records\Event as CourierEventRecord;
 use refinery\courier\models\Event as CourierEventModel;
-// use refinery\courier\models\Blueprint as BlueprintModel;
 
 class EventsController extends Controller
 {
-  // Public Methods
-  // =========================================================================
-
-  /**
-   * @inheritdoc
-   */
   public function init()
   {
     $this->requireAdmin();
@@ -52,7 +45,14 @@ class EventsController extends Controller
     $eventModel->enabled      = $request->getParam('enabled', $eventModel->enabled);
 
     if (!Courier::getInstance()->events->saveEvent($eventModel)) {
-      Craft::$app->getSession()->setError(Craft::t('courier', 'Couldn’t save event.'));
+      Craft::$app
+        ->getSession()
+        ->setError(
+          Craft::t(
+            'courier',
+            'Couldn’t save event.'
+          )
+        );
 
       Craft::$app->getUrlManager()->setRouteParams([
         'event' => $eventModel,
@@ -63,7 +63,14 @@ class EventsController extends Controller
       ]);
     }
 
-    Craft::$app->getSession()->setNotice(Craft::t('courier', 'Event saved.'));
+    Craft::$app
+      ->getSession()
+      ->setNotice(
+        Craft::t(
+          'courier',
+          'Event saved.'
+        )
+      );
 
     return $this->redirect("courier/events");
   }
