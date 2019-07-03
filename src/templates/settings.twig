@@ -1,11 +1,11 @@
 {% import "_includes/forms" as forms %}
 
 {{ forms.textField({
-	label: 'Deliveries Record Limit'|t,
-	instructions: 'The maximum number of sent blueprint deliveries that Courier should keep record of at once.'|t,
-	name: 'deliveriesRecordLimit',
-	id: 'deliveriesRecordLimit',
-	type: 'number',
-	maxLength: 4,
-	value: settings.deliveriesRecordLimit
+  label: 'Deliveries Record Limit'|t,
+  instructions: 'The maximum number of sent blueprint deliveries that Courier should keep record of at once.'|t,
+  name: 'deliveriesRecordLimit',
+  id: 'deliveriesRecordLimit',
+  type: 'number',
+  maxLength: 4,
+  value: settings.deliveriesRecordLimit
 }) }}
