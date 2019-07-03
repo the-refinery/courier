@@ -8,20 +8,20 @@ use craft\base\Component;
 
 class ModelPopulator extends Component
 {
-	public function populateModels(array $records, $targetModelClass): array
-	{
-		$models = [];
+  public function populateModels(array $records, $targetModelClass): array
+  {
+    $models = [];
 
-		if (!empty($records)) {
-			foreach($records as $record) {
-				$model = new $targetModelClass();
-				$modelAttributes = array_keys($model->getAttributes());
-				$recordAttributes = $record->getAttributes($modelAttributes);
-				$model->setAttributes($recordAttributes);
-				$models[] = $model;
-			}
-		}
+    if (!empty($records)) {
+      foreach($records as $record) {
+      $model = new $targetModelClass();
+      $modelAttributes = array_keys($model->getAttributes());
+      $recordAttributes = $record->getAttributes($modelAttributes);
+      $model->setAttributes($recordAttributes);
+      $models[] = $model;
+      }
+    }
 
-		return $models;
-	}
+    return $models;
+  }
 }
