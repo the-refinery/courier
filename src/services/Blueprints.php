@@ -10,6 +10,7 @@ use refinery\courier\models\Blueprint as BlueprintModel;
 use refinery\courier\services\ModelPopulator;
 use refinery\courier\queue\jobs\SendCourierEmailJob;
 use yii\base\Event;
+use yii\log\Logger;
 
 class Blueprints extends Component
 {
@@ -20,30 +21,49 @@ class Blueprints extends Component
       $criteria = Blueprint::find();
     }
 
-    $records = $criteria
-      ->all();
+    $models = [];
 
-    $models = Courier::getInstance()
-      ->modelPopulator
-      ->populateModels(
-        $records,
-        \refinery\courier\models\Blueprint::class
+    try {
+      $records = $criteria
+        ->all();
+
+      $models = Courier::getInstance()
+        ->modelPopulator
+        ->populateModels(
+          $records,
+          \refinery\courier\models\Blueprint::class
+        );
+    } catch(\Exception $e) {
+      Courier::log(
+        "There was a problem obtaining all Blueprints:\n\n{$e->getMessage()}",
+        Logger::LEVEL_ERROR
       );
+
+      throw $e;
+    }
 
     return $models;
   }
 
-
   public function getEnabledBlueprints()
   {
-    $criteria = Blueprint::find()
-      ->where(
-        [
-          'enabled' => true
-        ]
+    try {
+      $criteria = Blueprint::find()
+        ->where(
+          [
+            'enabled' => true
+          ]
+        );
+
+      return $this->getAllBlueprints($criteria);
+    } catch(\Exception $e) {
+      Courier::log(
+        "There was a problem obtaining enabled Blueprints:\n\n{$e->getMessage()}",
+        Logger::LEVEL_ERROR
       );
 
-    return $this->getAllBlueprints($criteria);
+      throw $e;
+    }
   }
 
   public function saveBlueprint(BlueprintModel $model)
@@ -77,7 +97,21 @@ class Blueprints extends Component
     $record->textEmailTemplatePath  = $model->textEmailTemplatePath;
     $record->eventTriggerConditions = $model->eventTriggerConditions;
 
-    $record->save(false);
+    $transaction = Craft::$app->db->beginTransaction();
+
+    try {
+      $record->save(false);
+      $transaction->commit();
+    } catch(\Exception $e) {
+      $transaction->rollBack();
+      Courier::log(
+        "There was a problem saving Blueprint:\n\n{$e->getMessage()}",
+        Logger::LEVEL_ERROR
+      );
+
+      throw $e;
+    }
+
     $model->id = $record->id;
 
     return true;
@@ -85,7 +119,18 @@ class Blueprints extends Component
 
   public function getBlueprintById($id)
   {
-    $record = Blueprint::findOne($id);
+    $record = null;
+
+    try {
+      $record = Blueprint::findOne($id);
+    } catch(\Exception $e) {
+      Courier::log(
+        "There was a problem getting Blueprint by id={$id}:\n\n{$e->getMessage()}",
+        Logger::LEVEL_ERROR
+      );
+
+      throw $e;
+    }
 
     if (!$record) {
       return null;
@@ -103,14 +148,28 @@ class Blueprints extends Component
 
   public function deleteBlueprintById($id)
   {
-    $record = Blueprint::findOne($id);
-    $result = false;
+    $transaction = Craft::$app->db->beginTransaction();
 
-    if ($record) {
-      $result = $record->delete();
+    try {
+      $record = Blueprint::findOne($id);
+
+      if ($record) {
+        $result = $record->delete();
+        $transaction->commit();
+      } else {
+        throw new Exception("Blueprint with id={$id} not found to delete.");
+      }
+    } catch (\Exception $e) {
+      $transaction->rollBack();
+      Courier::log(
+        "There was a problem deleting Blueprint={$id}:\n\n{$e->getMessage()}",
+        Logger::LEVEL_ERROR
+      );
+
+      throw $e;
     }
 
-    return $result;
+    return true;
   }
 
   public function checkEventConditions(Event $event, BlueprintModel $blueprint)
@@ -132,8 +191,12 @@ class Blueprints extends Component
       ->view
       ->renderString($blueprint->eventTriggerConditions, $renderVariables);
     } catch (\Exception $e) {
-      // Log here
-      throw new \Exception($e);
+      Courier::log(
+        "There was a problem rendering eventTriggerConditions for Blueprint id={$blueprint->id}:\n\n{$e->getMessage()}",
+        Logger::LEVEL_ERROR
+      );
+
+      throw $e;
     }
 
     $eventTriggerConditions = trim($eventTriggerConditions);
@@ -150,7 +213,16 @@ class Blueprints extends Component
     $courierEmailJob->blueprintName = $blueprint->name;
 
     // Send email job
-    Craft::$app->queue->push($courierEmailJob);
+    try {
+      Craft::$app->queue->push($courierEmailJob);
+    } catch(\Exception $e) {
+      Courier::log(
+        "There was a problem adding a Courier email job to the queue:\n\n{$e->getMessage()}",
+        Logger::LEVEL_ERROR
+      );
+
+      throw $e;
+    }
 
     return true;
   }
