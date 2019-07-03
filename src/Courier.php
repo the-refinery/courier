@@ -25,6 +25,7 @@ use craft\web\twig\variables\CraftVariable;
 use craft\events\RegisterUrlRulesEvent;
 
 use yii\base\Event;
+use yii\log\Logger;
 
 /**
  * Class Courier
@@ -63,6 +64,18 @@ class Courier extends Plugin
     {
         parent::init();
         self::$plugin = $this;
+
+        // Craft3 removed the ability to log plugin-level stuff to a different
+        // file other than web.log. The following setup will allow you to call
+        // Courier::log() from anywhere in the plugin and it will write to
+        // @storage/logs/courier.log as well as the normal web.log
+        $fileTarget = new \craft\log\FileTarget([
+            'logFile' => Craft::getAlias('@storage/logs/courier.log'),
+            'categories' => ['courier']
+        ]);
+
+        Craft::getLogger()->dispatcher->targets[] = $fileTarget;
+        // ---------------------------------------------------------------------
 
         $this->setComponents(
             [
@@ -118,5 +131,19 @@ class Courier extends Plugin
                 'settings' => $this->getSettings()
             ]
         );
+    }
+
+    // Craft3 removed the ability to log plugin-level stuff to a different
+    // file other than web.log. This function allows you to call
+    // Courier::log() from anywhere in the plugin and it will write to
+    // @storage/logs/courier.log as well as the normal web.log
+    // See $this->init() for more details.
+    public static function log($message, $level = Logger::LEVEL_INFO){
+        Craft::getLogger()
+            ->log(
+                $message,
+                $level,
+                'courier'
+            );
     }
 }
