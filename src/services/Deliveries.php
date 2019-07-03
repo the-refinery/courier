@@ -156,16 +156,18 @@ class Deliveries extends Component
     return $result;
 	}
 
-	/**
-	 * @param array|\CDbCriteria $criteria
-	 *
-	 * @return bool $result
-	 *
-	 * @throws \Exception
-	 */
 	public function deleteAllDeliveries($criteria = [])
 	{
-		return Delivery::deleteAll();
+		$result = null;
+
+		try {
+			$result = Delivery::deleteAll();
+    } catch(\Exception $e) {
+			// Log here
+
+		}
+
+		return $result;
 	}
 
 	/**
