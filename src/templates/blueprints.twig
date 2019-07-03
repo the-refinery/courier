@@ -1,18 +1,27 @@
 {% extends "courier/_layout" %}
 
-{% set tabs = {
-  blueprints: { label: 'Blueprints'|t, url: url('courier') },
-  deliveries: { label: 'Deliveries'|t, url: url('courier/deliveries') },
-  events:     { label: 'Events'|t, url: url('courier/events') }
-} %}
-
 {% set selectedTab = 'blueprints' %}
+{% set selectedSubnavItem = 'blueprints' %}
+
+{% set crumbs = [
+  { label: 'Courier'|t, url: url('courier') },
+  { label: 'Blueprints'|t, url: url('courier/blueprints') },
+] %}
 
 {% set extraPageHeaderHtml %}
   <div class="buttons">
     <a href="{{ url('courier/blueprints/new') }}" class="btn submit add icon">{{ "New Blueprint"|t }}</a>
   </div>
 {% endset %}
+
+{% block actionButton %}
+  <div class="buttons">
+    <a class="btn submit add icon"
+      href="{{ url('courier/blueprints/new') }}">{{ "New Blueprint"|t }}
+    </a>
+  </div>
+{% endblock %}
+
 {% block content %}
   <h2>{{ 'Blueprints'|t }}</h2>
   <p id="no-blueprints"{% if blueprints|length %} class="hidden"{% endif %}>
@@ -58,9 +67,6 @@
       </table>
     </div>
   {% endif %}
-  <div class="buttons">
-    <a href="{{ url('courier/blueprints/new') }}" class="btn submit add icon">{{ 'New Blueprint'|t }}</a>
-  </div>
 {% endblock %}
 
 {% includejs %}

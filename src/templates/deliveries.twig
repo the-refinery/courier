@@ -1,12 +1,12 @@
 {% extends "courier/_layout" %}
 
-{% set tabs = {
-  blueprints: { label: 'Blueprints'|t, url: url('courier') },
-  deliveries: { label: 'Deliveries'|t, url: url('courier/deliveries') },
-  events:     { label: 'Events'|t, url: url('courier/events') }
-} %}
-
 {% set selectedTab = 'deliveries' %}
+{% set selectedSubnavItem = 'deliveries' %}
+
+{% set crumbs = [
+  { label: 'Courier'|t, url: url('courier') },
+  { label: 'Deliveries'|t, url: url('courier/deliveries') },
+] %}
 
 {% block content %}
   <h2>{{ "Deliveries"|t }}</h2>

@@ -1,20 +1,20 @@
 {% extends "courier/_layout" %}
 
-{% set tabs = {
-  blueprints: { label: 'Blueprints'|t, url: url('courier') },
-  deliveries: { label: 'Deliveries'|t, url: url('courier/deliveries') },
-  events:     { label: 'Events'|t, url: url('courier/events') }
-} %}
-
 {% set selectedTab = 'events' %}
+{% set selectedSubnavItem = 'events' %}
+
+{% set crumbs = [
+  { label: 'Courier'|t, url: url('courier') },
+  { label: 'Events'|t, url: url('courier/events') },
+] %}
 
 {% import "_includes/forms" as forms %}
 
 {% block actionButton %}
   <div class="buttons">
-  <a class="btn submit add icon"
-    href="{{ url('courier/events/new') }}">{{ "New Event"|t }}
-  </a>
+    <a class="btn submit add icon"
+      href="{{ url('courier/events/new') }}">{{ "New Event"|t }}
+    </a>
   </div>
 {% endblock %}
 

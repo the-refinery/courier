@@ -82,6 +82,18 @@ class Courier extends Plugin
     );
   }
 
+  public function getCpNavItem()
+  {
+    $item = parent::getCpNavItem();
+    $item['subnav'] = [
+        'blueprints' => ['label' => 'Blueprints', 'url' => 'courier/blueprints'],
+        'events' => ['label' => 'Events', 'url' => 'courier/events'],
+        'deliveries' => ['label' => 'Deliveries', 'url' => 'courier/deliveries'],
+    ];
+
+    return $item;
+  }
+
   // Craft3 removed the ability to log plugin-level stuff to a different
   // file other than web.log. This function allows you to call
   // Courier::log() from anywhere in the plugin and it will write to
