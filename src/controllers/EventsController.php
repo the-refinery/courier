@@ -38,9 +38,9 @@ class EventsController extends Controller
     $eventModel = new CourierEventModel();
     $request = Craft::$app->getRequest();
 
-    $eventModel->id 					= $request->getParam('eventId', $eventModel->id);
+    $eventModel->id           = $request->getParam('eventId', $eventModel->id);
     $eventModel->eventHandle  = $request->getParam('eventHandle', $eventModel->eventHandle);
-    $eventModel->eventClass 	= $request->getParam('eventClass', $eventModel->eventClass);
+    $eventModel->eventClass   = $request->getParam('eventClass', $eventModel->eventClass);
     $eventModel->description  = $request->getParam('eventDescription', $eventModel->description);
     $eventModel->enabled      = $request->getParam('enabled', $eventModel->enabled);
 
@@ -98,7 +98,7 @@ class EventsController extends Controller
   }
 
   public function actionDelete() : Response
-	{
+ {
     $this->requirePostRequest();
     $this->requireAcceptsJson();
 
