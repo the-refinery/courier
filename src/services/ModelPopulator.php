@@ -14,11 +14,11 @@ class ModelPopulator extends Component
 
     if (!empty($records)) {
       foreach($records as $record) {
-      $model = new $targetModelClass();
-      $modelAttributes = array_keys($model->getAttributes());
-      $recordAttributes = $record->getAttributes($modelAttributes);
-      $model->setAttributes($recordAttributes);
-      $models[] = $model;
+        $model = new $targetModelClass();
+        $modelAttributes = array_keys($model->getAttributes());
+        $recordAttributes = $record->getAttributes($modelAttributes);
+        $model->setAttributes($recordAttributes);
+        $models[] = $model;
       }
     }
 
