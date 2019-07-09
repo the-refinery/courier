@@ -37,13 +37,11 @@ class Emails extends Component
         ->send($email);
 
       $resultEventParams['success'] = $success;
-    } catch (\Exception $e) {
-      // Log error
-      // $error = Craft::t("Could not send email for the blueprint named “{blueprint}”.\r\n{error}", [
-      //  'blueprint' => $blueprint->name,
-      //  'error' => $e->getMessage(),
-      // ]);
-      // CourierPlugin::log($error, LogLevel::Error, true);
+    } catch (\Throwable $e) {
+      Courier::log(
+        "\nCould not send email for the blueprint named {$blueprint->name}:\n{$e->getMessage()}\n{$e->getTraceAsString()}",
+        Logger::LEVEL_ERROR
+      );
 
       throw new \Exception($e);
 
@@ -57,12 +55,6 @@ class Emails extends Component
     }
 
     if ($success) {
-      // Log here
-      // $message = Craft::t('Successfully sent email for “{blueprint}”.', [
-      //  'blueprint' => $blueprint->name,
-      // ]);
-      // CourierPlugin::log($message, LogLevel::Info);
-
       // Fire a new onBlueprintEmailSentEvent
       $event = new BlueprintEmailEvent([
         'blueprint' => $blueprint,
@@ -72,15 +64,14 @@ class Emails extends Component
 
       $this->onAfterBlueprintEmailSent($event);
     } else {
-      // Log here
-      // $error = Craft::t("Unknown error occurred when attempting to send email for “{blueprint}”.\r\nCheck your Craft log for more details.", [
-      //  'blueprint' => $blueprint->name,
-      // ]);
-      // CourierPlugin::log($error, LogLevel::Error);
-      // $resultEventParams['error'] = $error;
+      Courier::log(
+        "\nUnknown error occurred when attempting to send email for {$blueprint->name}:\n{$e->getMessage()}\n{$e->getTraceAsString()}",
+        Logger::LEVEL_ERROR
+      );
+
+      $error = "Unknown error occurred when attempting to send email for '{$blueprint->name}'.\r\nCheck your Craft log for more details.";
 
       // Fire a new onBlueprintEmailFailedEvent
-      $error = "Unknown error occurred when attempting to send email for '{$blueprint->name}'.\r\nCheck your Craft log for more details.";
       $event = new BlueprintEmailEvent([
         'blueprint' => $blueprint,
         'renderVariables' => $renderVariables,
@@ -124,19 +115,10 @@ class Emails extends Component
           $emailVariables
         );
     } catch (Exception $e) {
-        // Log here.
-      // $error = Craft::t("Could not create email for the blueprint named “{blueprint}”.\r\n{error}", [
-      //  'blueprint' => $blueprint->name,
-      //  'error' => $e->getMessage(),
-        // ]);
-
-      // CourierPlugin::log($error, LogLevel::Error, true);
-
-      // $resultEventParams['error'] = $error;
-
-      // // Fire a new onBlueprintEmailFailedEvent
-      // $event = new Event($this, $resultEventParams);
-      // $this->onAfterBlueprintEmailFailed($event);
+      Courier::log(
+        "\nThere was a problem rendering blueprint settings for blueprint {$blueprint->name}:\n{$e->getMessage()}\n{$e->getTraceAsString()}",
+        Logger::LEVEL_ERROR
+      );
 
       return null;
     }
@@ -211,14 +193,10 @@ class Emails extends Component
         }
         catch (\Exception $e) {
           // Template path parse error
-          // LOg here.
-          // $errorMessage = $e->getMessage();
-          // $error = Craft::t("Template parse error encountered while parsing field “{attributeHandle}” for the blueprint named “{blueprint}.”:\r\n{error}", [
-          //  'blueprint' => $blueprint->name,
-          //  'attributeHandle' => $attributeHandle,
-          //  'error' => $errorMessage,
-          // ]);
-          // CourierPlugin::log($error, LogLevel::Error, true);
+          Courier::log(
+            "\nTemplate parse error encountered while parsing field {$attributeHandle} for blueprint {$blueprint->name}:\n{$e->getMessage()}\n{$e->getTraceAsString()}",
+            Logger::LEVEL_ERROR
+          );
 
           throw new Exception($error);
         }
@@ -234,11 +212,10 @@ class Emails extends Component
       if (!$templateExists) {
         // Log here
         $error = "Email template does not exist at path {$templatePath} for blueprint {$blueprint->name}";
-        // $error = Craft::t('Email template does not exist at path “{templatePath}” for blueprint “{blueprint}”.', [
-        //  'templatePath' => $templatePath,
-        //  'blueprint' => $blueprint->name,
-        // ]);
-        // CourierPlugin::log($error, LogLevel::Error, true);
+        Courier::log(
+          "\nEmail template does not exist at path {$templatePath} for blueprint {$blueprint->name}\n",
+          Logger::LEVEL_ERROR
+        );
 
         throw new \Exception($error);
       }
@@ -259,16 +236,13 @@ class Emails extends Component
         }
         catch (\Exception $e) {
           // Template file parse error
-          // Log here
           $errorMessage = $e->getMessage();
           $error = "Template parse error encountered while parsing the {$attributeHandle} file located at path {$templatePath} for the blueprint named {$blueprint->name}:\r\n{$errorMessage}";
-          // $error = Craft::t("Template parse error encountered while parsing the {templateName} file located at path “{templatePath}” for the blueprint named “{blueprint}”:\r\n{error}", [
-          //  'blueprint' => $blueprint->name,
-          //  'templateName' => $attributeHandle,
-          //  'templatePath' => $templatePath,
-          //  'error' => $errorMessage,
-          // ]);
-          // CourierPlugin::log($error, LogLevel::Error, true);
+
+          Courier::log(
+            $error,
+            Logger::LEVEL_ERROR
+          );
 
           throw new \Exception($error);
         }
@@ -329,14 +303,10 @@ class Emails extends Component
         }
         catch (\Exception $e) {
           // Template parse error
-          // Log exception here.
-          // $errorMessage = $e->getMessage();
-          // $error = Craft::t("Template parse error encountered while parsing field “{attributeName}” for the blueprint named “{blueprint}”:\r\n{error}", [
-          //  'blueprint' => $blueprint->name,
-          //  'attributeName' => $this->_camelCaseToTitle($attributeHandle),
-          //  'error' => $errorMessage
-          // ]);
-          // CourierPlugin::log($error, LogLevel::Error, true);
+          Courier::log(
+            "\nTemplate parse error encountered while parsing field {$attributeHandle} for blueprint {$blueprint->name}:\n{$e->getMessage()}\n{$e->getTraceAsString()}",
+            Logger::LEVEL_ERROR
+          );
 
           throw new Exception($error);
         }
