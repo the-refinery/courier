@@ -20,9 +20,20 @@ class Deliveries extends Component
       $criteria = Delivery::find();
     }
 
-    $records = $criteria
-      ->with('blueprint')
-      ->all();
+    $records = [];
+
+    try {
+      $records = $criteria
+        ->with('blueprint')
+        ->all();
+    } catch(\Throwable $e) {
+      Courier::log(
+        "\nThere was a problem getting all Deliveries:\n{$e->getMessage()}\n{$e->getTraceAsString()}",
+        Logger::LEVEL_ERROR
+      );
+
+      throw $e;
+    }
 
     $models = Courier::getInstance()
       ->modelPopulator
@@ -36,35 +47,64 @@ class Deliveries extends Component
 
   public function createDelivery(Event $event)
   {
-    $recipients = '';
-    $blueprint = $event->blueprint;
+    $transaction = Craft::$app->db->beginTransaction();
 
-    if(isset($blueprint->toEmail)) {
-      $toEmail = $blueprint->toEmail;
-      $recipients = is_array($toEmail) ?
-        $this->_convertEmailArrayToString($toEmail) :
-        $toEmail;
+    try {
+      $recipients = '';
+      $blueprint = $event->blueprint;
+
+      if(isset($blueprint->toEmail)) {
+        $toEmail = $blueprint->toEmail;
+        $recipients = is_array($toEmail) ?
+          $this->_convertEmailArrayToString($toEmail) :
+          $toEmail;
+      }
+
+      $delivery = new DeliveryModel();
+      $delivery->blueprintId    = $blueprint->id;
+      $delivery->toEmail        = $recipients;
+      $delivery->success        = $event->success;
+      $delivery->errorMessages  = $event->errorMessage;
+
+      // Save the delivery record
+      $delivery->id = $this->_saveDelivery($delivery);
+
+      $this->enforceDeliveriesLimit();
+
+      $transaction->commit();
+    } catch(\Throwable $e){
+      $transaction->rollBack();
+      Courier::log(
+        "\nThere was a problem creating Delivery:\n{$e->getMessage()}\n{$e->getTraceAsString()}",
+        Logger::LEVEL_ERROR
+      );
+
+      throw $e;
     }
 
-    $delivery = new DeliveryModel();
-    $delivery->blueprintId    = $blueprint->id;
-    $delivery->toEmail        = $recipients;
-    $delivery->success        = $event->success;
-    $delivery->errorMessages  = $event->errorMessage;
-
-    // Save the delivery record
-    $delivery->id = $this->_saveDelivery($delivery);
-
-    $this->enforceDeliveriesLimit();
+    return true;
   }
 
   public function deleteDeliveryById($id)
   {
-    $record = Delivery::findOne($id);
-    $result = false;
+    $transaction = Craft::$app->db->beginTransaction();
 
-    if ($record) {
-      $result = $record->delete();
+    try {
+      $record = Delivery::findOne($id);
+      $result = false;
+
+      if ($record) {
+        $result = $record->delete();
+        $transaction->commit();
+      }
+    } catch(\Throwable $e) {
+      $transaction->rollBack();
+      Courier::log(
+        "\nThere was a problem deleting Delivery:\n{$e->getMessage()}\n{$e->getTraceAsString()}",
+        Logger::LEVEL_ERROR
+      );
+
+      throw $e;
     }
 
     return $result;
@@ -73,11 +113,18 @@ class Deliveries extends Component
   public function deleteAllDeliveries($criteria = [])
   {
     $result = null;
+    $transaction = Craft::$app->db->beginTransaction();
 
     try {
       $result = Delivery::deleteAll();
-    } catch(\Exception $e) {
-      // Log here
+    } catch(\Throwable $e) {
+      $transaction->rollBack();
+      Courier::log(
+        "\nThere was a problem deleting all deliveries:\n{$e->getMessage()}\n{$e->getTraceAsString()}",
+        Logger::LEVEL_ERROR
+      );
+
+      throw $e;
     }
 
     return $result;
