@@ -9,6 +9,7 @@ use refinery\courier\models\Blueprint as BlueprintModel;
 use refinery\courier\events\BlueprintEmailEvent;
 use craft\mail\Message;
 use yii\base\Event;
+use yii\log\Logger;
 
 class Emails extends Component
 {
